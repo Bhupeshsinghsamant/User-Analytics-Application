@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CausalFunnel Analytics Demo Page</title>
+    <style>
+        body { font-family: -apple-system, sans-serif; background: #f8fafc; color: #1e293b; padding: 2rem; text-align: center; }
+        .card { background: white; max-width: 650px; margin: 2rem auto; padding: 2rem; border-radius: 12px; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1); }
+        .btn { padding: 0.75rem 1.5rem; font-size: 1rem; font-weight: 600; border-radius: 8px; border: none; cursor: pointer; margin: 0.5rem; transition: transform 0.1s; }
+        .btn-primary { background: #4f46e5; color: white; }
+        .btn-accent { background: #10b981; color: white; }
+        .btn-outline { background: white; color: #4f46e5; border: 2px solid #4f46e5; }
+        .btn:hover { transform: translateY(-2px); }
+        #toast { position: fixed; bottom: 20px; right: 20px; background: #0f172a; color: white; padding: 12px 20px; border-radius: 8px; display: none; }
+    </style>
+</head>
+<body>
+    <div class="card">
+        <h1>📊 CausalFunnel Interactive Demo</h1>
+        <p style="color: #64748b; margin: 1rem 0 2rem;">Click the buttons below to generate real analytics events directly to your MongoDB Atlas cluster!</p>
+        <div>
+            <button id="btn-demo-primary" class="btn btn-primary">Primary Action</button>
+            <button id="btn-demo-accent" class="btn btn-accent">Checkout Button</button>
+            <button id="btn-demo-outline" class="btn btn-outline">Explore More</button>
+        </div>
+    </div>
+    <div id="toast"></div>
+    <script src="tracker.js" data-api-url="http://127.0.0.1:5000/api"></script>
+    <script>
+        window.addEventListener('cf:click_tracked', function(e) {
+            var t = document.getElementById('toast');
+            t.innerText = 'Click recorded: (' + e.detail.clickCoordinates.x + ', ' + e.detail.clickCoordinates.y + ')';
+            t.style.display = 'block';
+            setTimeout(function() { t.style.display = 'none'; }, 2000);
+        });
+    </script>
+</body>
+</html>

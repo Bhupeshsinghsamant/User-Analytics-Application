@@ -1,0 +1,278 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CausalFunnel Demo Store - Pricing</title>
+    <style>
+        :root {
+            --primary: #4f46e5;
+            --primary-hover: #4338ca;
+            --bg: #f8fafc;
+            --card-bg: #ffffff;
+            --text-main: #0f172a;
+            --text-muted: #64748b;
+            --border: #e2e8f0;
+            --accent: #10b981;
+        }
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+        }
+        body {
+            background-color: var(--bg);
+            color: var(--text-main);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+        header {
+            background: var(--card-bg);
+            border-bottom: 1px solid var(--border);
+            padding: 1rem 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            position: sticky;
+            top: 0;
+            z-index: 50;
+        }
+        .logo {
+            font-size: 1.25rem;
+            font-weight: 700;
+            color: var(--primary);
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        nav {
+            display: flex;
+            gap: 1.5rem;
+            align-items: center;
+        }
+        nav a {
+            text-decoration: none;
+            color: var(--text-muted);
+            font-weight: 500;
+            transition: color 0.15s;
+        }
+        nav a:hover, nav a.active {
+            color: var(--primary);
+        }
+        .container {
+            max-width: 1100px;
+            margin: 3rem auto;
+            padding: 0 2rem;
+            text-align: center;
+        }
+        h1 {
+            font-size: 2.5rem;
+            font-weight: 800;
+            margin-bottom: 0.5rem;
+        }
+        p.subtitle {
+            color: var(--text-muted);
+            font-size: 1.125rem;
+            margin-bottom: 3rem;
+        }
+        .pricing-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 2rem;
+            text-align: left;
+        }
+        .pricing-card {
+            background: var(--card-bg);
+            border: 1px solid var(--border);
+            border-radius: 1rem;
+            padding: 2.5rem 2rem;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+            position: relative;
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+        .pricing-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 10px 20px -3px rgba(0, 0, 0, 0.1);
+        }
+        .pricing-card.popular {
+            border: 2px solid var(--primary);
+        }
+        .popular-badge {
+            position: absolute;
+            top: -12px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: var(--primary);
+            color: white;
+            padding: 0.25rem 0.75rem;
+            border-radius: 9999px;
+            font-size: 0.75rem;
+            font-weight: 700;
+            text-transform: uppercase;
+        }
+        .price {
+            font-size: 2.25rem;
+            font-weight: 800;
+            margin: 1rem 0 1.5rem;
+        }
+        .price span {
+            font-size: 1rem;
+            color: var(--text-muted);
+            font-weight: 400;
+        }
+        .features-list {
+            list-style: none;
+            margin-bottom: 2rem;
+        }
+        .features-list li {
+            padding: 0.5rem 0;
+            color: var(--text-muted);
+            font-size: 0.95rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        .features-list li::before {
+            content: "✓";
+            color: var(--accent);
+            font-weight: 700;
+        }
+        .btn {
+            width: 100%;
+            padding: 0.75rem 1rem;
+            font-size: 1rem;
+            font-weight: 600;
+            border-radius: 0.5rem;
+            cursor: pointer;
+            transition: all 0.2s;
+            border: none;
+            text-align: center;
+        }
+        .btn-primary {
+            background: var(--primary);
+            color: white;
+        }
+        .btn-primary:hover {
+            background: var(--primary-hover);
+        }
+        .btn-outline {
+            background: transparent;
+            color: var(--primary);
+            border: 1px solid var(--primary);
+        }
+        .btn-outline:hover {
+            background: #eff6ff;
+        }
+        #cf-toast {
+            position: fixed;
+            bottom: 1.5rem;
+            right: 1.5rem;
+            background: #1e293b;
+            color: #f8fafc;
+            padding: 0.85rem 1.25rem;
+            border-radius: 0.5rem;
+            font-size: 0.875rem;
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.2);
+            display: none;
+            z-index: 100;
+            border-left: 4px solid var(--accent);
+        }
+        footer {
+            margin-top: auto;
+            padding: 2rem;
+            text-align: center;
+            border-top: 1px solid var(--border);
+            color: var(--text-muted);
+            font-size: 0.875rem;
+        }
+    </style>
+</head>
+<body>
+
+    <header>
+        <div class="logo">
+            <span>📊</span> CausalFunnel Analytics Demo
+        </div>
+        <nav>
+            <a href="index.html">Home</a>
+            <a href="pricing.html" class="active">Pricing</a>
+            <a href="http://localhost:5173" target="_blank" style="color: var(--primary); font-weight: 600;">Open Dashboard ↗</a>
+        </nav>
+    </header>
+
+    <div class="container">
+        <h1>Transparent, Predictable Pricing</h1>
+        <p class="subtitle">Pick a plan to test tracking user decisions and conversion interest.</p>
+
+        <div class="pricing-grid">
+            <!-- Free Tier -->
+            <div class="pricing-card">
+                <h3>Starter</h3>
+                <p style="color: var(--text-muted);">For personal projects and testing.</p>
+                <div class="price">₹0 <span>/ month</span></div>
+                <ul class="features-list">
+                    <li>Up to 10,000 monthly events</li>
+                    <li>7-day data retention</li>
+                    <li>Standard click heatmaps</li>
+                </ul>
+                <button id="btn-plan-starter" class="btn btn-outline">Choose Starter</button>
+            </div>
+
+            <!-- Pro Tier -->
+            <div class="pricing-card popular">
+                <div class="popular-badge">Most Popular</div>
+                <h3>Professional</h3>
+                <p style="color: var(--text-muted);">For growing apps and marketing teams.</p>
+                <div class="price">₹1,999 <span>/ month</span></div>
+                <ul class="features-list">
+                    <li>Up to 500,000 monthly events</li>
+                    <li>90-day data retention</li>
+                    <li>High-density precision heatmaps</li>
+                    <li>Full session timeline inspector</li>
+                </ul>
+                <button id="btn-plan-pro" class="btn btn-primary">Choose Professional</button>
+            </div>
+
+            <!-- Enterprise Tier -->
+            <div class="pricing-card">
+                <h3>Enterprise</h3>
+                <p style="color: var(--text-muted);">For large platforms needing scale.</p>
+                <div class="price">Custom</div>
+                <ul class="features-list">
+                    <li>Unlimited events</li>
+                    <li>Custom retention window</li>
+                    <li>Dedicated cluster isolation</li>
+                </ul>
+                <button id="btn-plan-enterprise" class="btn btn-outline">Contact Sales</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Live Tracking Feedback Banner -->
+    <div id="cf-toast"></div>
+
+    <footer>
+        <p>CausalFunnel Full Stack Engineer Intern Assignment • Demo Website</p>
+    </footer>
+
+    <!-- Load Standalone Analytics SDK -->
+    <script src="../tracker/tracker.js" data-api-url="http://127.0.0.1:5000/api"></script>
+
+    <script>
+        window.addEventListener('cf:click_tracked', function(e) {
+            var toast = document.getElementById('cf-toast');
+            if (toast) {
+                var coords = e.detail.clickCoordinates;
+                toast.innerHTML = '🎯 <strong>Click Captured:</strong> (' + coords.x + ', ' + coords.y + ')<br><small style="color: #94a3b8;">Plan: ' + (e.detail.targetText || e.detail.targetTag) + '</small>';
+                toast.style.display = 'block';
+                clearTimeout(window.__toastTimeout);
+                window.__toastTimeout = setTimeout(function() {
+                    toast.style.display = 'none';
+                }, 2500);
+            }
+        });
+    </script>
+</body>
+</html>

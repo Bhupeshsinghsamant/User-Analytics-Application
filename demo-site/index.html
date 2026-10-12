@@ -1,0 +1,243 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CausalFunnel Demo Store - Home</title>
+    <style>
+        :root {
+            --primary: #4f46e5;
+            --primary-hover: #4338ca;
+            --bg: #f8fafc;
+            --card-bg: #ffffff;
+            --text-main: #0f172a;
+            --text-muted: #64748b;
+            --border: #e2e8f0;
+            --accent: #10b981;
+        }
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+        }
+        body {
+            background-color: var(--bg);
+            color: var(--text-main);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+        header {
+            background: var(--card-bg);
+            border-bottom: 1px solid var(--border);
+            padding: 1rem 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            position: sticky;
+            top: 0;
+            z-index: 50;
+        }
+        .logo {
+            font-size: 1.25rem;
+            font-weight: 700;
+            color: var(--primary);
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        nav {
+            display: flex;
+            gap: 1.5rem;
+            align-items: center;
+        }
+        nav a {
+            text-decoration: none;
+            color: var(--text-muted);
+            font-weight: 500;
+            transition: color 0.15s;
+        }
+        nav a:hover, nav a.active {
+            color: var(--primary);
+        }
+        .hero {
+            padding: 4rem 2rem;
+            text-align: center;
+            max-width: 800px;
+            margin: 0 auto;
+        }
+        .hero h1 {
+            font-size: 2.75rem;
+            font-weight: 800;
+            line-height: 1.2;
+            margin-bottom: 1rem;
+            color: var(--text-main);
+        }
+        .hero p {
+            font-size: 1.125rem;
+            color: var(--text-muted);
+            margin-bottom: 2rem;
+            line-height: 1.6;
+        }
+        .btn-group {
+            display: flex;
+            gap: 1rem;
+            justify-content: center;
+        }
+        .btn {
+            padding: 0.75rem 1.75rem;
+            font-size: 1rem;
+            font-weight: 600;
+            border-radius: 0.5rem;
+            cursor: pointer;
+            transition: all 0.2s;
+            border: none;
+            text-decoration: none;
+            display: inline-block;
+        }
+        .btn-primary {
+            background: var(--primary);
+            color: white;
+            box-shadow: 0 4px 6px -1px rgba(79, 70, 229, 0.2);
+        }
+        .btn-primary:hover {
+            background: var(--primary-hover);
+            transform: translateY(-1px);
+        }
+        .btn-secondary {
+            background: white;
+            color: var(--text-main);
+            border: 1px solid var(--border);
+        }
+        .btn-secondary:hover {
+            background: #f1f5f9;
+        }
+        .features {
+            max-width: 1100px;
+            margin: 3rem auto;
+            padding: 0 2rem;
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 2rem;
+        }
+        .feature-card {
+            background: var(--card-bg);
+            border: 1px solid var(--border);
+            border-radius: 0.75rem;
+            padding: 2rem;
+            box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.05);
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+        .feature-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.08);
+        }
+        .feature-card h3 {
+            font-size: 1.25rem;
+            margin-bottom: 0.75rem;
+        }
+        .feature-card p {
+            color: var(--text-muted);
+            line-height: 1.5;
+            margin-bottom: 1.5rem;
+        }
+        /* Live tracker debug toast */
+        #cf-toast {
+            position: fixed;
+            bottom: 1.5rem;
+            right: 1.5rem;
+            background: #1e293b;
+            color: #f8fafc;
+            padding: 0.85rem 1.25rem;
+            border-radius: 0.5rem;
+            font-size: 0.875rem;
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.2);
+            display: none;
+            z-index: 100;
+            border-left: 4px solid var(--accent);
+            animation: fadeIn 0.2s ease-in;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        footer {
+            margin-top: auto;
+            padding: 2rem;
+            text-align: center;
+            border-top: 1px solid var(--border);
+            color: var(--text-muted);
+            font-size: 0.875rem;
+        }
+    </style>
+</head>
+<body>
+
+    <header>
+        <div class="logo">
+            <span>📊</span> CausalFunnel Analytics Demo
+        </div>
+        <nav>
+            <a href="index.html" class="active">Home</a>
+            <a href="pricing.html">Pricing</a>
+            <a href="http://localhost:5173" target="_blank" class="btn btn-secondary" style="padding: 0.5rem 1rem; font-size: 0.875rem;">Open Dashboard ↗</a>
+        </nav>
+    </header>
+
+    <main>
+        <section class="hero">
+            <h1>Understand User Journeys with Real-Time Analytics</h1>
+            <p>This interactive demo page tracks real pageviews and click coordinates. Every button and link clicked is persisted to MongoDB Atlas and visualizable in the React Heatmap Dashboard.</p>
+            <div class="btn-group">
+                <button id="btn-hero-signup" class="btn btn-primary">Start Free Trial</button>
+                <a id="btn-hero-pricing" href="pricing.html" class="btn btn-secondary">View Pricing Plans</a>
+            </div>
+        </section>
+
+        <section class="features">
+            <div class="feature-card">
+                <h3>⚡ Real-Time Tracking</h3>
+                <p>Captures client events seamlessly without locking the UI thread using lightweight vanilla JS.</p>
+                <button id="btn-feature-realtime" class="btn btn-secondary">Test Feature Click</button>
+            </div>
+            <div class="feature-card">
+                <h3>🗺️ Precision Heatmaps</h3>
+                <p>Logs exact X/Y coordinate pairs scaled to your viewport for high-density hotspot rendering.</p>
+                <button id="btn-feature-heatmap" class="btn btn-secondary">Simulate Heatmap Click</button>
+            </div>
+            <div class="feature-card">
+                <h3>🔒 Privacy First</h3>
+                <p>Automatically filters sensitive inputs, passwords, and tokens before reaching the network.</p>
+                <button id="btn-feature-privacy" class="btn btn-secondary">Check Privacy Rules</button>
+            </div>
+        </section>
+    </main>
+
+    <!-- Live Tracking Feedback Banner -->
+    <div id="cf-toast"></div>
+
+    <footer>
+        <p>CausalFunnel Full Stack Engineer Intern Assignment • Demo Website</p>
+    </footer>
+
+    <!-- Load Standalone Analytics SDK -->
+    <script src="../tracker/tracker.js" data-api-url="http://127.0.0.1:5000/api"></script>
+
+    <!-- Toast feedback listener for real demonstration -->
+    <script>
+        window.addEventListener('cf:click_tracked', function(e) {
+            var toast = document.getElementById('cf-toast');
+            if (toast) {
+                var coords = e.detail.clickCoordinates;
+                toast.innerHTML = '🎯 <strong>Click Captured:</strong> (' + coords.x + ', ' + coords.y + ')<br><small style="color: #94a3b8;">Element: ' + (e.detail.targetText || e.detail.targetTag) + '</small>';
+                toast.style.display = 'block';
+                clearTimeout(window.__toastTimeout);
+                window.__toastTimeout = setTimeout(function() {
+                    toast.style.display = 'none';
+                }, 2500);
+            }
+        });
+    </script>
+</body>
+</html>
