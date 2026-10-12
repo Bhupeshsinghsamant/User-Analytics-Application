@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>CausalFunnel Analytics Demo - Home</title>
+    <title>User Analyser - Intelligent Web Analytics</title>
     <style>
         :root {
             --primary: #4f46e5;
@@ -493,7 +493,7 @@
     <!-- Sticky Navigation Bar -->
     <header>
         <div class="logo">
-            <span>📊</span> CausalFunnel Analytics Demo
+            <span>📊</span> User Analyser
         </div>
         <nav>
             <a href="index.html" class="active">Home</a>
@@ -506,10 +506,10 @@
         <!-- Hero Section -->
         <section class="hero">
             <div class="hero-badge">
-                <span>⚡</span> Full Stack User Analytics Demo Platform
+                <span>⚡</span> Intelligent User Analytics Platform
             </div>
             <h1>Understand User Journeys with <span>Real-Time Heatmaps</span></h1>
-            <p>Every button, link, and interactive widget on this page is tracked by the standalone Vanilla JS SDK, ingested via Flask, saved in MongoDB Atlas, and rendered on the live React Dashboard.</p>
+            <p>Analyze user navigation paths, track click interactions with pixel precision, and optimize conversion rates with privacy-first analytics.</p>
             <div class="btn-group">
                 <button id="btn-hero-signup" class="btn btn-primary" onclick="openSignupModal()">
                     <span>🚀</span> Start Free Trial
@@ -525,7 +525,7 @@
             <div class="feature-card">
                 <div class="feature-icon">⚡</div>
                 <h3>Real-Time Tracking</h3>
-                <p>Captures client events seamlessly without locking the UI thread. Every action dispatches coordinates to the Flask backend.</p>
+                <p>Captures user activity seamlessly without impacting website performance. Monitor active visitors as they browse.</p>
                 <div class="feature-action-bar">
                     <button id="btn-feature-realtime" class="btn btn-secondary btn-sm" onclick="handleFeatureTest(this, 'Real-time Tracking')">
                         Test Feature Click
@@ -537,7 +537,7 @@
             <div class="feature-card">
                 <div class="feature-icon">🗺️</div>
                 <h3>Precision Heatmaps</h3>
-                <p>Logs exact X/Y coordinate pairs scaled to your viewport for high-density hotspot rendering on HTML5 Canvas.</p>
+                <p>Visualize user attention with high-density click heatmaps mapped accurately to every viewport and device size.</p>
                 <div class="feature-action-bar">
                     <button id="btn-feature-heatmap" class="btn btn-secondary btn-sm" onclick="handleFeatureTest(this, 'Precision Heatmaps')">
                         Simulate Heatmap Click
@@ -549,7 +549,7 @@
             <div class="feature-card">
                 <div class="feature-icon">🔒</div>
                 <h3>Privacy First</h3>
-                <p>Automatically filters sensitive inputs, passwords, and tokens before reaching the network. GDPR and compliance-ready.</p>
+                <p>Designed with compliance in mind. Sensitive fields, passwords, and personal credentials are automatically masked at the source.</p>
                 <div class="feature-action-bar">
                     <button id="btn-feature-privacy" class="btn btn-secondary btn-sm" onclick="openPrivacyModal()">
                         Check Privacy Rules
@@ -680,7 +680,7 @@
     <div id="cf-toast"></div>
 
     <footer>
-        <p>CausalFunnel Full Stack Engineer Intern Assignment • Demo Website</p>
+        <p>© 2026 User Analyser · All rights reserved.</p>
     </footer>
 
     <!-- Load Standalone Analytics SDK -->
@@ -698,7 +698,7 @@
                 var elText = e.detail.targetText || e.detail.targetTag;
                 toast.innerHTML = '🎯 <strong>Click Captured:</strong> (' + coords.x + ', ' + coords.y + ')<br>' +
                                   '<span style="color: #cbd5e1;">Target: "' + elText + '"</span><br>' +
-                                  '<a href="http://localhost:5173" target="_blank">View Live on Heatmap Dashboard ↗</a>';
+                                  '<a href="http://localhost:5173" target="_blank">View Live in User Analyser ↗</a>';
                 toast.style.display = 'block';
                 clearTimeout(window.__toastTimeout);
                 window.__toastTimeout = setTimeout(function() {
@@ -723,28 +723,28 @@
         // Showcase Tabs
         var tabData = [
             {
-                title: 'Standalone Vanilla JS Tracking SDK',
-                desc: 'Under 4 KB uncompressed, zero npm dependencies. Auto-binds session IDs in sessionStorage, measures document & viewport scroll offsets, and emits clean JSON payloads.',
+                title: 'High-Performance Event Collection',
+                desc: 'Ultra-lightweight tracking engine with zero external dependencies. Automatically handles session continuity and captures viewport interactions without UI latency.',
                 icon: '⚙️',
-                action: 'Simulate SDK Heartbeat'
+                action: 'Test Event Pulse'
             },
             {
-                title: 'Python Flask REST API & Validation',
-                desc: 'Flask 3.x blueprint with automated payload validation, type checking, coordinate bounds checking, and CORS support.',
-                icon: '🐍',
-                action: 'Test API Health Check'
+                title: 'Real-Time Ingestion Pipeline',
+                desc: 'Enterprise-grade ingestion processing event validation, schema sanitation, coordinate normalization, and high-throughput logging.',
+                icon: '⚡',
+                action: 'Run Pipeline Check'
             },
             {
-                title: 'MongoDB Atlas Ingestion & Indexing',
-                desc: 'Compound indexed collections on (sessionId, pageUrl, eventType, timestamp). Real-time aggregation pipelines power the dashboard stats.',
-                icon: '🍃',
-                action: 'Trigger Atlas Query'
+                title: 'Indexed Cloud Analytics Store',
+                desc: 'Optimized cloud database storage delivering sub-second aggregations, session timeline queries, and historical interaction retrieval.',
+                icon: '📊',
+                action: 'Query Session Store'
             },
             {
-                title: 'React + HTML5 Canvas Heatmap Dashboard',
-                desc: 'Dynamic viewport coordinate mapping with thermal radial gradients and precision pinpoints with interactive hover tooltips.',
+                title: 'Precision Heatmap Visualizer',
+                desc: 'HTML5 Canvas rendering engine mapping thermal density gradients and pinpoint coordinate clusters dynamically across device viewports.',
                 icon: '🔥',
-                action: 'Inspect Live Heatmap'
+                action: 'Launch Heatmap View'
             }
         ];
 

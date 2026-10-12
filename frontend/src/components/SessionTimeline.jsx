@@ -29,11 +29,14 @@ export default function SessionTimeline({ sessionId, events = [], loading = fals
             {sessionId}
           </h3>
         </div>
-        <span className="badge badge-indigo">{events.length} Events</span>
+        <div className="flex items-center gap-2">
+          {loading && <span className="text-xs text-indigo-600 animate-spin">⟳</span>}
+          <span className="badge badge-indigo">{events.length} Events</span>
+        </div>
       </div>
 
       <div className="timeline-container">
-        {loading ? (
+        {loading && events.length === 0 ? (
           <div className="p-8 text-center text-slate-400 text-sm animate-pulse">
             Fetching chronological events...
           </div>

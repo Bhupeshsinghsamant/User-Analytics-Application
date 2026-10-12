@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>CausalFunnel Analytics Demo - Pricing</title>
+    <title>User Analyser - Transparent Pricing</title>
     <style>
         :root {
             --primary: #4f46e5;
@@ -432,7 +432,7 @@
 
     <header>
         <div class="logo">
-            <span>📊</span> CausalFunnel Analytics Demo
+            <span>📊</span> User Analyser
         </div>
         <nav>
             <a href="index.html">Home</a>
@@ -443,7 +443,7 @@
 
     <div class="container">
         <h1>Transparent, Predictable Pricing</h1>
-        <p class="subtitle">Choose a plan to test user conversion intent and subscription tracking in MongoDB Atlas.</p>
+        <p class="subtitle">Choose the ideal plan to scale analytics across your web applications.</p>
 
         <!-- Interactive Billing Toggle -->
         <div class="billing-toggle-container">
@@ -456,7 +456,7 @@
             <!-- Free Tier -->
             <div class="pricing-card">
                 <h3>Starter</h3>
-                <p class="desc">For personal projects and testing.</p>
+                <p class="desc">For personal projects and early-stage websites.</p>
                 <div class="price">₹0 <span>/ month</span></div>
                 <ul class="features-list">
                     <li>Up to 10,000 monthly events</li>
@@ -514,7 +514,7 @@
                     <span class="icon">+</span>
                 </div>
                 <div class="faq-answer">
-                    Yes! You can switch between Starter and Professional anytime. Your events are never lost and continue to persist safely in MongoDB Atlas.
+                    Yes! You can switch between Starter and Professional anytime. Your analytics history and session events are always preserved.
                 </div>
             </div>
 
@@ -536,7 +536,7 @@
             <button class="modal-close-btn" onclick="closeModal('modal-checkout')">&times;</button>
             <div id="checkout-form-view">
                 <h3 id="checkout-title">Select Plan</h3>
-                <p>Confirm your plan choice to log conversion decision events.</p>
+                <p>Confirm your plan choice to activate your analytics workspace.</p>
                 <div class="plan-summary-box">
                     <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.5rem;">
                         <strong id="summary-plan-name" style="font-size: 1.1rem;">Professional Plan</strong>
@@ -551,7 +551,7 @@
             <div id="checkout-success-view" style="display: none; text-align: center; padding: 1.5rem 0;">
                 <div style="font-size: 3rem; margin-bottom: 0.75rem;">🎉</div>
                 <h3 style="margin-bottom: 0.5rem;">Plan Activated!</h3>
-                <p style="color: #059669; margin-bottom: 1.5rem;">Your conversion event was recorded and is now inspectable on the live React dashboard.</p>
+                <p style="color: #059669; margin-bottom: 1.5rem;">Your subscription has been activated in User Analyser.</p>
                 <button class="btn btn-primary" onclick="closeModal('modal-checkout')" style="width: 100%; justify-content: center;">
                     Done
                 </button>
@@ -563,7 +563,7 @@
     <div id="cf-toast"></div>
 
     <footer>
-        <p>CausalFunnel Full Stack Engineer Intern Assignment • Demo Website</p>
+        <p>© 2026 User Analyser · All rights reserved.</p>
     </footer>
 
     <!-- Load Standalone Analytics SDK -->
@@ -632,7 +632,7 @@
                 var elText = e.detail.targetText || e.detail.targetTag;
                 toast.innerHTML = '🎯 <strong>Click Captured:</strong> (' + coords.x + ', ' + coords.y + ')<br>' +
                                   '<span style="color: #cbd5e1;">Target: "' + elText + '"</span><br>' +
-                                  '<a href="http://localhost:5173" target="_blank">View Live on Heatmap Dashboard ↗</a>';
+                                  '<a href="http://localhost:5173" target="_blank">View Live in User Analyser ↗</a>';
                 toast.style.display = 'block';
                 clearTimeout(window.__toastTimeout);
                 window.__toastTimeout = setTimeout(function() {

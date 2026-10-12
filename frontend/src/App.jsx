@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { api } from './services/api';
 import MetricCards from './components/MetricCards';
 import SessionsTable from './components/SessionsTable';
@@ -47,10 +47,19 @@ export default function App() {
     }
   }, []);
 
+  // Refs to store active selections and prevent race conditions / stale closures
+  const selectedSessionRef = useRef(null);
+  selectedSessionRef.current = selectedSessionId;
+
+  const selectedPageRef = useRef(selectedPage);
+  selectedPageRef.current = selectedPage;
+
+  const activeSessionFetchRef = useRef(null);
+
   // Fetch overview metrics & sessions list
   const loadDashboardData = useCallback(async () => {
     setLoadingStats(true);
-    setLoadingSessions(true);
+    setLoadingSessions((prev) => (sessions.length === 0 ? true : prev));
 
     try {
       const [statsRes, sessionsRes] = await Promise.all([
@@ -66,30 +75,39 @@ export default function App() {
       const sessionList = sessionsRes.sessions || [];
       setSessions(sessionList);
 
-      // Auto-select first session if none selected
-      if (!selectedSessionId && sessionList.length > 0) {
-        setSelectedSessionId(sessionList[0].sessionId);
-      }
+      // Auto-select first session ONLY if nothing is selected yet
+      // Functional state updater guarantees it NEVER overwrites active inspect selection!
+      setSelectedSessionId((current) => {
+        if (current) {
+          return current; // PRESERVE active inspected session!
+        }
+        return sessionList.length > 0 ? sessionList[0].sessionId : null;
+      });
     } catch (e) {
       console.error('Error loading dashboard data:', e);
     } finally {
       setLoadingStats(false);
       setLoadingSessions(false);
     }
-  }, [selectedSessionId]);
+  }, []);
 
   // Fetch events for selected session
   const loadSessionEvents = useCallback(async (sessId) => {
     if (!sessId) return;
+    activeSessionFetchRef.current = sessId;
     setLoadingTimeline(true);
     try {
       const res = await api.getSessionEvents(sessId);
-      setSessionEvents(res.events || []);
+      // Race condition guard: only update if user is still inspecting this session!
+      if (activeSessionFetchRef.current === sessId) {
+        setSessionEvents(res.events || []);
+      }
     } catch (err) {
       console.error('Failed to load session timeline:', err);
-      setSessionEvents([]);
     } finally {
-      setLoadingTimeline(false);
+      if (activeSessionFetchRef.current === sessId) {
+        setLoadingTimeline(false);
+      }
     }
   }, []);
 
@@ -126,16 +144,20 @@ export default function App() {
     }
   }, [activeTab, selectedPage, loadClickEvents]);
 
-  // Auto-refresh interval (10s)
+  // Auto-refresh interval (10s) - uses refs to avoid resetting timer or rerunning on selection changes
   useEffect(() => {
     if (!autoRefresh) return;
     const interval = setInterval(() => {
       loadDashboardData();
-      if (selectedSessionId) loadSessionEvents(selectedSessionId);
-      if (activeTab === 'heatmap') loadClickEvents(selectedPage);
+      if (selectedSessionRef.current) {
+        loadSessionEvents(selectedSessionRef.current);
+      }
+      if (activeTab === 'heatmap') {
+        loadClickEvents(selectedPageRef.current);
+      }
     }, 10000);
     return () => clearInterval(interval);
-  }, [autoRefresh, loadDashboardData, selectedSessionId, loadSessionEvents, activeTab, selectedPage, loadClickEvents]);
+  }, [autoRefresh, loadDashboardData, loadSessionEvents, loadClickEvents, activeTab]);
 
   return (
     <div className="app-container">
@@ -147,10 +169,10 @@ export default function App() {
           </div>
           <div>
             <h1 className="text-lg font-extrabold text-slate-900 tracking-tight">
-              CausalFunnel Analytics
+              User Analyser
             </h1>
             <p className="text-[11px] text-slate-500 font-medium">
-              Full Stack User Analytics Platform · MongoDB Atlas Live
+              Understand how users interact with your website.
             </p>
           </div>
         </div>
@@ -162,7 +184,7 @@ export default function App() {
             {healthStatus.status === 'connected' ? (
               <>
                 <span className="pulse-dot"></span>
-                <span>Atlas Connected</span>
+                <span>Database Connected</span>
               </>
             ) : (
               <>
@@ -285,9 +307,9 @@ export default function App() {
         <div className="flex items-center justify-between text-xs text-slate-400">
           <span className="flex items-center gap-1">
             <ShieldCheck size={14} className="text-emerald-500" />
-            CausalFunnel Full Stack Engineer Intern Assignment · Built with Flask, React, MongoDB Atlas
+            User Analyser · Modern Web Analytics Platform
           </span>
-          <span>Zero Fake Data · 100% Real Ingested Events</span>
+          <span>© 2026 User Analyser. All rights reserved.</span>
         </div>
       </footer>
     </div>

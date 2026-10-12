@@ -30,7 +30,7 @@ export default function SessionsTable({
       <div className="card-header">
         <div>
           <h2 className="text-lg font-bold text-slate-900">Recorded Sessions</h2>
-          <p className="text-xs text-slate-500">Distinct browser sessions stored in MongoDB Atlas</p>
+          <p className="text-xs text-slate-500">Active and historical visitor sessions across your web applications</p>
         </div>
         <div className="search-box">
           <Search size={14} className="text-slate-400" />
@@ -45,7 +45,7 @@ export default function SessionsTable({
       </div>
 
       <div className="table-container">
-        {loading ? (
+        {loading && sessions.length === 0 ? (
           <div className="p-8 text-center text-slate-400 text-sm animate-pulse">
             Loading active sessions from database...
           </div>
@@ -103,8 +103,10 @@ export default function SessionsTable({
                     </td>
                     <td>
                       <button
+                        type="button"
                         className={`btn-action ${isSelected ? 'active' : ''}`}
                         onClick={(e) => {
+                          e.preventDefault();
                           e.stopPropagation();
                           onSelectSession(s.sessionId);
                         }}

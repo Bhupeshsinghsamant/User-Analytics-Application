@@ -1,75 +1,79 @@
-# CausalFunnel User Analytics Application
+﻿# User Analyser
 
-A professional, full-stack, real-time web analytics and event tracking platform built for the **CausalFunnel Full Stack Engineer Intern Assignment**.
+A modern, high-performance, full-stack web analytics and session intelligence platform. User Analyser provides end-to-end visibility into user interactions through privacy-first client tracking, low-latency event ingestion, persistent session mapping, and interactive click heatmaps.
 
-This application implements a complete, end-to-end data pipeline:
-1. **Standalone Vanilla JavaScript Tracking SDK** captures tab-persistent user sessions, automatic pageviews, and precision click coordinates.
-2. **Python Flask REST API** validates payloads, enforces schemas, and persists events.
-3. **MongoDB Atlas** cloud database provides indexing, persistence, and aggregation pipelines.
-4. **React + Vite Dashboard** visualizes overview metrics, session lists, chronological user journeys, and page-specific click heatmaps with normalized coordinate scaling.
+---
+
+## Overview & Problem Statement
+
+Modern digital products often struggle with web analytics solutions that are either overly complex, slow, invasive to user privacy, or prohibitively expensive for early-stage teams. Traditional analytics suites inject heavy tracking scripts that impact Core Web Vitals, sample event data unpredictably, and obscure raw interaction coordinates behind opaque metrics.
+
+**User Analyser** solves this by providing a lightweight, transparent, full-stack analytics pipeline:
+- **Zero-Dependency Client SDK**: Ultra-compact vanilla JavaScript tracker (`tracker.js`) that captures session journeys and click coordinates without degrading page performance.
+- **High-Throughput Validation API**: Python Flask REST backend enforcing strict schema validation and batch ingestion.
+- **Scalable Document Persistence**: MongoDB Atlas free-tier (M0) compatible cluster with optimized compound indexing.
+- **Actionable Visual Dashboard**: React + Vite interface offering real-time metric counters, granular session inspection, and normalized HTML5 Canvas click heatmaps.
+
+---
+
+## Technology Stack
+
+| Layer | Technologies | Key Capabilities |
+|---|---|---|
+| **Client SDK** | Vanilla JavaScript (ES6+) | Zero external dependencies, non-blocking, ~7 KB, sessionStorage session persistence, automatic PII masking |
+| **Backend API** | Python 3.10+, Flask 3.1, PyMongo 4.11 | RESTful design, strict schema validation, CORS configuration, batch processing, TLS database connection |
+| **Database** | MongoDB Atlas (Cloud M0 / Local 7.0+) | Document storage, compound indexes on `(sessionId, timestamp)` and `(pageUrl, eventType)`, aggregation pipelines |
+| **Frontend Dashboard** | React 19, Vite, Lucide Icons, CSS3 | Real-time KPI cards, searchable sessions table, chronological journey inspector, interactive HTML5 Canvas heatmap |
+| **Testing & Tooling** | pytest, Vite build engine, Git | 12 automated unit and integration tests, production build verification |
 
 ---
 
 ## Architecture & Data Flow
 
 ```text
-┌─────────────────────────────────┐
-│     Client Website / Demo       │
-│   (HTML + tracker.js SDK)       │
-└────────────────┬────────────────┘
-                 │
-                 │ POST /api/events (page_view & click + coordinates)
-                 ▼
-┌─────────────────────────────────┐
-│       Flask Backend API         │
-│   (Payload Validation & CORS)   │
-└────────────────┬────────────────┘
-                 │
-                 │ PyMongo Driver (TLS / certifi)
-                 ▼
-┌─────────────────────────────────┐
-│      MongoDB Atlas (Cloud)      │
-│   - events collection (indexed) │
-│   - sessions collection (aggr)  │
-└────────────────┬────────────────┘
-                 │
-                 │ GET /api/sessions & /api/events/clicks
-                 ▼
-┌─────────────────────────────────┐
-│     React Analytics Dashboard   │
-│   - Overview Metric Cards       │
-│   - User Journey Timeline       │
-│   - Real Click Heatmap Canvas   │
-└─────────────────────────────────┘
+┌────────────────────────────────────────────────────────┐
+│             Client Website / Web Application           │
+│         (HTML Page + Embedded tracker.js SDK)          │
+└───────────────────────────┬────────────────────────────┘
+                            │
+                            │ POST /api/events (page_view, click + coordinates)
+                            ▼
+┌────────────────────────────────────────────────────────┐
+│              Flask REST API (Python 3.10+)             │
+│    - JSON Schema Validation                            │
+│    - PII & Sensitive Input Masking Guard               │
+│    - CORS & Batch Event Processing                     │
+└───────────────────────────┬────────────────────────────┘
+                            │
+                            │ PyMongo Driver (TLS / certifi)
+                            ▼
+┌────────────────────────────────────────────────────────┐
+│              MongoDB Atlas Cloud Cluster               │
+│    - 'events' Collection (Indexed by session, time)    │
+│    - 'sessions' Aggregation Pipeline                   │
+└───────────────────────────┬────────────────────────────┘
+                            │
+                            │ GET /api/sessions, /api/events/clicks, /api/stats/overview
+                            ▼
+┌────────────────────────────────────────────────────────┐
+│            React + Vite Analytics Dashboard            │
+│    - Overview Metric KPI Cards                         │
+│    - Filterable Active Sessions Table                  │
+│    - Chronological User Journey Timeline               │
+│    - Resolution-Normalized HTML5 Canvas Click Heatmap  │
+└────────────────────────────────────────────────────────┘
 ```
 
 ---
 
-## Features
+## Core Features
 
-- **Zero Fake Data Guarantee**: Every metric, session, and heatmap spot displayed is generated by real user interactions stored in MongoDB Atlas.
-- **Standalone Vanilla JS SDK (`tracker.js`)**:
-  - Independent of React/Node runtime.
-  - Generates and reuses unique `sessionId` across page navigations via `sessionStorage`.
-  - Automatic `page_view` tracking with deduplication.
-  - Global click listener capturing exact coordinates `(x, y)`, viewport dimensions, and clicked element metadata.
-  - Privacy-preserving: automatically filters out passwords and sensitive input fields.
-  - Non-blocking: network or tracking failures never crash or disrupt the host website.
-- **Backend API (Flask + PyMongo)**:
-  - `POST /api/events` (and `/api/track`): Ingests single or batch events with strict schema validation.
-  - `GET /api/sessions`: Aggregates active sessions with event counts and latest activity timestamps.
-  - `GET /api/sessions/<sessionId>/events`: Chronological event breakdown of an individual user's journey.
-  - `GET /api/events/clicks?page_url=...`: Fetches page-specific click coordinates with normalized scaling.
-  - `GET /api/health`: Live health check and MongoDB connection verification.
-  - `GET /api/stats/overview`: Real-time platform summary metrics.
-- **React Dashboard (Vite + React)**:
-  - Overview metric cards (Total Sessions, Events, Page Views, Clicks).
-  - Searchable Sessions Table with inspect action.
-  - User Journey Timeline with visual distinction between pageviews and clicks.
-  - Interactive HTML5 Canvas Heatmap supporting continuous density gradients and individual click pinpoints with hover tooltips.
-  - Live backend health indicator and 10s auto-refresh toggle.
-- **Interactive Multi-Page Demo Site (`demo-site/`)**:
-  - Independent static website demonstrating tracking and session continuity across page navigations (`index.html` and `pricing.html`).
+- **Full Data Ownership**: Complete control of your interaction data with direct database access and zero vendor lock-in.
+- **Privacy-Preserving Tracking SDK**: Automatically ignores input fields with sensitive types (e.g., passwords, authorization tokens) and isolates tracking errors so host applications never crash.
+- **Session Continuity**: Retains unique session tokens across internal page navigations via `sessionStorage` with automatic deduplication.
+- **Precision Normalized Heatmaps**: Captures both viewport dimensions and page coordinates, calculating relative percentages (`0.0` - `1.0`) so clicks align across diverse screen resolutions.
+- **Chronological Session Inspector**: Inspects visitor paths, viewing the sequence of visited pages and clicked elements in real time.
+- **Live Health Monitoring**: Instant database connectivity checks with automatic status polling.
 
 ---
 
@@ -79,21 +83,23 @@ This application implements a complete, end-to-end data pipeline:
 User Analytics Application/
 ├── backend/
 │   ├── app/
-│   │   ├── __init__.py          # Flask app factory with CORS configuration
+│   │   ├── __init__.py          # Flask application factory with CORS configuration
 │   │   ├── config.py            # Environment configuration loader
 │   │   ├── db.py                # MongoDB Atlas connection manager & auto-indexing
 │   │   ├── models.py            # Event schema validation & BSON serialization
-│   │   └── routes.py            # REST API endpoints
+│   │   └── routes.py            # REST API endpoints (/api/events, /api/sessions, /api/health)
 │   ├── tests/
+│   │   ├── __init__.py
 │   │   ├── test_api.py          # 10 unit tests for schema validation & endpoints
 │   │   └── test_integration.py  # End-to-end integration test with live Atlas cluster
-│   ├── test_connection.py      # Diagnostic script for MongoDB Atlas connectivity
-│   ├── requirements.txt         # Python dependencies
+│   ├── test_connection.py       # Diagnostic script for MongoDB Atlas connectivity
+│   ├── requirements.txt         # Python backend dependencies
 │   ├── run.py                   # Flask server entry point
 │   └── .env.example             # Backend environment template
 ├── frontend/
 │   ├── public/
-│   │   └── tracker.js           # Publicly hosted tracking SDK
+│   │   ├── favicon.svg          # Application favicon
+│   │   └── tracker.js           # Public tracking SDK asset
 │   ├── src/
 │   │   ├── components/
 │   │   │   ├── MetricCards.jsx      # Overview statistics cards
@@ -105,16 +111,18 @@ User Analytics Application/
 │   │   ├── App.jsx                  # Main dashboard layout
 │   │   ├── index.css                # Modern responsive SaaS stylesheet
 │   │   └── main.jsx                 # React root mount
-│   ├── package.json
-│   └── vite.config.js
+│   ├── package.json             # Frontend dependencies & scripts
+│   └── vite.config.js           # Vite build configuration
 ├── tracker/
-│   ├── tracker.js               # Standalone Vanilla JS SDK
-│   └── demo.html                # Standalone test page
+│   ├── tracker.js               # Standalone Vanilla JS SDK source
+│   └── demo.html                # Standalone interactive test page
 ├── demo-site/
-│   ├── index.html               # Demo website home page
-│   └── pricing.html             # Demo website pricing page (multi-page navigation)
+│   ├── index.html               # Multi-feature demo website (Home)
+│   └── pricing.html             # Multi-page navigation demo (Pricing)
+├── .env.example                 # Root environment template
 ├── .gitignore                   # Excludes .env, venv/, node_modules/, dist/
-└── README.md
+├── LICENSE                      # MIT Open Source License
+└── README.md                    # Project documentation
 ```
 
 ---
@@ -123,12 +131,20 @@ User Analytics Application/
 
 - **Python**: 3.10+ (tested on Python 3.14.7)
 - **Node.js**: v18+ (tested on Node.js v24.21.0 & npm 11.19.0)
-- **MongoDB Atlas**: Free M0 Sandbox Cluster (₹0 / Free Tier)
+- **MongoDB Atlas**: Free M0 Sandbox Cluster (₹0 / Free Tier) or local MongoDB 7.0+
 
 ---
 
-## Environment Setup
+## Environment Setup & Configuration
 
+### 1. MongoDB Atlas Free Tier Setup
+1. Create a free account at [MongoDB Atlas](https://www.mongodb.com/cloud/atlas).
+2. Deploy a free **M0 Sandbox** cluster (no credit card required).
+3. Under **Database Access**, create a database user with **Read and write to any database** permissions.
+4. Under **Network Access**, click **Add IP Address** and choose `0.0.0.0/0` (Allow Access from Anywhere) to permit local development access.
+5. In **Database Deployments**, click **Connect** -> **Drivers** -> **Python** and copy your connection string.
+
+### 2. Environment Configuration
 Create a `.env` file in `backend/` or the project root (use `.env.example` as a template):
 
 ```env
@@ -151,7 +167,7 @@ FLASK_DEBUG=True
 
 ### 1. Backend (Flask)
 
-Open Terminal in the project root:
+Open a PowerShell terminal in the project root:
 
 ```powershell
 # Navigate to backend
@@ -178,7 +194,7 @@ python run.py
 
 ### 2. Frontend Dashboard (React + Vite)
 
-Open a second Terminal:
+Open a second PowerShell terminal:
 
 ```powershell
 cd frontend
@@ -195,10 +211,10 @@ npm run dev
 Open `demo-site/index.html` directly in your browser or run a simple local HTTP server:
 
 ```powershell
-# Using Python built-in server:
+# Using Python built-in server from the project root:
 python -m http.server 5500
 ```
-Open [http://127.0.0.1:5500/demo-site/index.html](http://127.0.0.1:5500/demo-site/index.html) in your browser. Click on buttons and navigate to the Pricing page. Your clicks will be sent to Flask and stored in MongoDB Atlas in real time!
+Open [http://127.0.0.1:5500/demo-site/index.html](http://127.0.0.1:5500/demo-site/index.html) in your browser. Click on buttons and navigate between pages to generate real-time analytics events stored directly in MongoDB Atlas.
 
 ---
 
@@ -210,14 +226,14 @@ To ensure click heatmaps remain aligned across different screen resolutions and 
 - `normalizedCoordinates: { x, y }` — Proportional values computed as `x / viewport.width` and `y / viewport.height` (bounded between `0.0` and `1.0`).
 
 On the React Heatmap Canvas:
-$$\text{display\_x} = \text{normalized\_x} \times \text{canvas\_width}$$
-$$\text{display\_y} = \text{normalized\_y} \times \text{canvas\_height}$$
+- `display_x = normalized_x * canvas_width`
+- `display_y = normalized_y * canvas_height`
 
-This ensures that clicks recorded on a 1920×1080 display align with the corresponding elements when previewed on a smaller dashboard container.
+This ensures that clicks recorded on varying displays (e.g., 1920×1080 or 1366×768) scale accurately to match the corresponding UI elements on the dashboard preview canvas.
 
 ---
 
-## API Reference
+## REST API Reference
 
 ### 1. Ingest Event
 - **Endpoint**: `POST /api/events` (alias: `/api/track`)
@@ -321,18 +337,54 @@ This ensures that clicks recorded on a 1920×1080 display align with the corresp
 
 ---
 
-## Automated Testing
+## Automated Testing & Verification
 
-Run the full pytest suite inside the virtual environment:
+### Backend Test Suite (pytest)
+Run the full pytest suite inside the Python virtual environment:
 
 ```powershell
-backend\venv\Scripts\python.exe -m pytest backend/tests/ -v
+cd backend
+.\venv\Scripts\python.exe -m pytest -v
 ```
 
-**Results**:
-- `test_api.py`: 10 passed (schema validation, click coordinate validation, serialization, 404 & health checks).
-- `test_integration.py`: 1 passed (full end-to-end ingestion, session grouping, and retrieval against live Atlas cluster).
-- **Total**: 11 passed (100% pass rate).
+**Actual Verified Results**:
+```text
+test_connection.py::test_mongodb_connection PASSED                       [  8%]
+tests/test_api.py::test_validate_page_view_success PASSED                [ 16%]
+tests/test_api.py::test_validate_click_with_coords_success PASSED        [ 25%]
+tests/test_api.py::test_validate_click_missing_coords_fails PASSED       [ 33%]
+tests/test_api.py::test_validate_click_invalid_coords_fails PASSED       [ 41%]
+tests/test_api.py::test_validate_invalid_event_type_fails PASSED         [ 50%]
+tests/test_api.py::test_validate_missing_session_id_fails PASSED         [ 58%]
+tests/test_api.py::test_serialize_doc PASSED                             [ 66%]
+tests/test_api.py::test_health_endpoint PASSED                           [ 75%]
+tests/test_api.py::test_track_invalid_body PASSED                        [ 83%]
+tests/test_api.py::test_404_handler PASSED                               [ 91%]
+tests/test_integration.py::test_live_integration_pipeline PASSED         [100%]
+
+======================== 12 passed in 6.41s ========================
+```
+
+### Frontend Production Build
+Verify the production build using Vite:
+
+```powershell
+cd frontend
+npm run build
+```
+
+**Actual Verified Results**:
+```text
+vite v8.3.4 building client environment for production...
+transforming...
+✓ 1912 modules transformed.
+rendering chunks...
+computing gzip size...
+dist/index.html                   0.48 kB │ gzip:  0.31 kB
+dist/assets/index-r6Hif0un.css    8.63 kB │ gzip:  2.43 kB
+dist/assets/index-Bsh1v1dX.js   248.80 kB │ gzip: 77.46 kB
+✓ built in 1.43s
+```
 
 ---
 
@@ -347,9 +399,10 @@ Add this single `<script>` tag before the closing `</body>` tag of any HTML page
 </script>
 ```
 
+The script automatically initializes, manages session state, captures page views, and streams click interactions asynchronously without slowing down your page.
+
 ---
 
-## License & Credits
+## License
 
-Built for the **CausalFunnel Full Stack Engineer Intern Assignment** by Bhupesh Singh Samant.
-Free and Open Source (MIT License).
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.

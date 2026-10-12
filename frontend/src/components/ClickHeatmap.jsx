@@ -226,7 +226,7 @@ export default function ClickHeatmap({ pages = [], clicks = [], selectedPage, on
         {isPricingPage ? (
           <div className="heatmap-backdrop">
             <div className="mock-nav">
-              <div className="mock-logo">📊 CausalFunnel Pricing</div>
+              <div className="mock-logo">📊 User Analyser Pricing</div>
               <div className="mock-links">Home · Pricing · Open Dashboard ↗</div>
             </div>
             <div className="mock-hero" style={{ padding: '1.5rem 1rem' }}>
@@ -253,7 +253,7 @@ export default function ClickHeatmap({ pages = [], clicks = [], selectedPage, on
         ) : (
           <div className="heatmap-backdrop">
             <div className="mock-nav">
-              <div className="mock-logo">📊 CausalFunnel Demo Store</div>
+              <div className="mock-logo">📊 User Analyser Store</div>
               <div className="mock-links">Home · Pricing · Open Dashboard ↗</div>
             </div>
             <div className="mock-hero">
