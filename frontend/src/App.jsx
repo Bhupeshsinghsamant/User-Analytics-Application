@@ -101,7 +101,6 @@ export default function App() {
       setClickEvents(res.clicks || []);
     } catch (err) {
       console.error('Failed to load clicks for heatmap:', err);
-      setClickEvents([]);
     } finally {
       setLoadingClicks(false);
     }
@@ -201,9 +200,20 @@ export default function App() {
             target="_blank"
             rel="noreferrer"
             className="btn btn-primary text-xs flex items-center gap-1.5"
-            title="Open interactive website to test real clicks"
+            title="Open interactive Home page to test real clicks"
           >
-            <span>Test Demo Site</span>
+            <span>Demo Home</span>
+            <ExternalLink size={13} />
+          </a>
+
+          <a
+            href="http://127.0.0.1:5000/demo-site/pricing.html"
+            target="_blank"
+            rel="noreferrer"
+            className="btn btn-secondary text-xs flex items-center gap-1.5"
+            title="Open interactive Pricing page to test conversions"
+          >
+            <span>Demo Pricing</span>
             <ExternalLink size={13} />
           </a>
         </div>

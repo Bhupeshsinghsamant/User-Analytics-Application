@@ -15,7 +15,7 @@ export default function ClickHeatmap({ pages = [], clicks = [], selectedPage, on
 
     const ctx = canvas.getContext('2d');
     const width = container.clientWidth || 800;
-    const height = Math.max(container.clientHeight || 520, 520);
+    const height = Math.max(container.clientHeight || 540, 540);
 
     // Set canvas dimensions
     canvas.width = width;
@@ -42,11 +42,15 @@ export default function ClickHeatmap({ pages = [], clicks = [], selectedPage, on
           return;
         }
 
+        // Clamp inside bounds
+        x = Math.max(10, Math.min(width - 10, x));
+        y = Math.max(10, Math.min(height - 10, y));
+
         // Radial glow
-        const radius = 35;
+        const radius = 38;
         const grad = ctx.createRadialGradient(x, y, 0, x, y, radius);
-        grad.addColorStop(0, 'rgba(239, 68, 68, 0.7)');    // Bright Red center
-        grad.addColorStop(0.3, 'rgba(249, 115, 22, 0.5)'); // Warm Orange
+        grad.addColorStop(0, 'rgba(239, 68, 68, 0.75)');   // Bright Red center
+        grad.addColorStop(0.35, 'rgba(249, 115, 22, 0.55)'); // Warm Orange
         grad.addColorStop(0.7, 'rgba(234, 179, 8, 0.25)'); // Yellow halo
         grad.addColorStop(1, 'rgba(234, 179, 8, 0)');     // Transparent edge
 
@@ -71,8 +75,11 @@ export default function ClickHeatmap({ pages = [], clicks = [], selectedPage, on
           return;
         }
 
+        x = Math.max(10, Math.min(width - 10, x));
+        y = Math.max(10, Math.min(height - 10, y));
+
         // Outer pulse circle
-        ctx.strokeStyle = 'rgba(79, 70, 229, 0.6)';
+        ctx.strokeStyle = 'rgba(79, 70, 229, 0.7)';
         ctx.lineWidth = 2;
         ctx.beginPath();
         ctx.arc(x, y, 8, 0, Math.PI * 2);
@@ -102,9 +109,9 @@ export default function ClickHeatmap({ pages = [], clicks = [], selectedPage, on
     const width = canvas.width;
     const height = canvas.height;
 
-    // Find closest click within threshold
+    // Find closest click within 28px threshold
     let closest = null;
-    let minDistance = 25; // 25px hit radius
+    let minDistance = 28;
 
     clicks.forEach(c => {
       let x, y;
@@ -130,6 +137,15 @@ export default function ClickHeatmap({ pages = [], clicks = [], selectedPage, on
     setHoveredClick(closest);
   }
 
+  function formatPageTitle(url) {
+    if (!url) return `All Tracked Pages (${pages.length})`;
+    if (url.includes('pricing.html')) return '💳 Pricing Page (/demo-site/pricing.html)';
+    if (url.includes('index.html')) return '🏠 Home Page (/demo-site/index.html)';
+    return url;
+  }
+
+  const isPricingPage = selectedPage && selectedPage.includes('pricing.html');
+
   return (
     <div className="card">
       <div className="card-header flex-wrap gap-3">
@@ -138,7 +154,12 @@ export default function ClickHeatmap({ pages = [], clicks = [], selectedPage, on
             <Flame size={20} />
           </div>
           <div>
-            <h2 className="text-lg font-bold text-slate-900">Real Click Heatmap</h2>
+            <div className="flex items-center gap-2">
+              <h2 className="text-lg font-bold text-slate-900">Real Click Heatmap</h2>
+              {loading && clicks.length > 0 && (
+                <span className="badge badge-indigo text-[10px] animate-pulse">Live Updating</span>
+              )}
+            </div>
             <p className="text-xs text-slate-500">Visual click coordinate density mapped to viewport</p>
           </div>
         </div>
@@ -153,7 +174,7 @@ export default function ClickHeatmap({ pages = [], clicks = [], selectedPage, on
           >
             <option value="">All Tracked Pages ({pages.length})</option>
             {pages.map((p, idx) => (
-              <option key={idx} value={p}>{p}</option>
+              <option key={idx} value={p}>{formatPageTitle(p)}</option>
             ))}
           </select>
 
@@ -175,7 +196,11 @@ export default function ClickHeatmap({ pages = [], clicks = [], selectedPage, on
             </button>
           </div>
 
-          <button className="btn-icon" onClick={onRefresh} title="Refresh click data">
+          <button
+            className={`btn-icon ${loading ? 'animate-spin text-indigo-600' : ''}`}
+            onClick={onRefresh}
+            title="Refresh click data"
+          >
             <RotateCcw size={14} />
           </button>
         </div>
@@ -183,7 +208,8 @@ export default function ClickHeatmap({ pages = [], clicks = [], selectedPage, on
 
       {/* Heatmap Preview Container */}
       <div className="heatmap-viewport-wrapper" ref={containerRef}>
-        {loading && (
+        {/* Only show full blocking overlay on initial cold load */}
+        {loading && clicks.length === 0 && (
           <div className="heatmap-loading-overlay">
             <span className="animate-spin text-2xl mr-2">⟳</span> Loading real click coordinates...
           </div>
@@ -196,45 +222,79 @@ export default function ClickHeatmap({ pages = [], clicks = [], selectedPage, on
           onMouseLeave={() => setHoveredClick(null)}
         />
 
-        {/* Mock/Reference browser background layout */}
-        <div className="heatmap-backdrop">
-          <div className="mock-nav">
-            <div className="mock-logo">Demo Header / Navbar</div>
-            <div className="mock-links">Home · Pricing · Docs</div>
-          </div>
-          <div className="mock-hero">
-            <div className="mock-title">Main Content Area</div>
-            <div className="mock-btn-box">
-              <div className="mock-btn primary">CTA Button Area</div>
-              <div className="mock-btn secondary">Secondary Link</div>
+        {/* Dynamic page-aware layout wireframe */}
+        {isPricingPage ? (
+          <div className="heatmap-backdrop">
+            <div className="mock-nav">
+              <div className="mock-logo">📊 CausalFunnel Pricing</div>
+              <div className="mock-links">Home · Pricing · Open Dashboard ↗</div>
+            </div>
+            <div className="mock-hero" style={{ padding: '1.5rem 1rem' }}>
+              <div className="mock-title">Transparent, Predictable Pricing</div>
+              <div style={{ display: 'inline-block', padding: '0.2rem 1rem', background: '#e0e7ff', borderRadius: '9999px', fontSize: '11px', color: '#4338ca', fontWeight: 600, marginTop: '0.5rem' }}>
+                Monthly Billing ⚪ Annual Billing (-20%)
+              </div>
+            </div>
+            <div className="mock-grid">
+              <div className="mock-box" style={{ borderTop: '3px solid #cbd5e1' }}>
+                <strong>Starter Tier (₹0)</strong>
+                <div style={{ fontSize: '10px', marginTop: '4px', color: '#94a3b8' }}>[Choose Starter CTA]</div>
+              </div>
+              <div className="mock-box" style={{ borderTop: '3px solid #4f46e5', background: '#f5f3ff' }}>
+                <strong style={{ color: '#4338ca' }}>Professional (₹1,999)</strong>
+                <div style={{ fontSize: '10px', marginTop: '4px', color: '#6366f1' }}>[Choose Professional CTA]</div>
+              </div>
+              <div className="mock-box" style={{ borderTop: '3px solid #cbd5e1' }}>
+                <strong>Enterprise (Custom)</strong>
+                <div style={{ fontSize: '10px', marginTop: '4px', color: '#94a3b8' }}>[Contact Sales CTA]</div>
+              </div>
             </div>
           </div>
-          <div className="mock-grid">
-            <div className="mock-box">Feature Card 1</div>
-            <div className="mock-box">Feature Card 2</div>
-            <div className="mock-box">Feature Card 3</div>
+        ) : (
+          <div className="heatmap-backdrop">
+            <div className="mock-nav">
+              <div className="mock-logo">📊 CausalFunnel Demo Store</div>
+              <div className="mock-links">Home · Pricing · Open Dashboard ↗</div>
+            </div>
+            <div className="mock-hero">
+              <div className="mock-title">Understand User Journeys with Real-Time Analytics</div>
+              <div className="mock-btn-box">
+                <div className="mock-btn primary">Start Free Trial CTA</div>
+                <div className="mock-btn secondary">View Pricing Plans</div>
+              </div>
+            </div>
+            <div className="mock-grid">
+              <div className="mock-box">Feature 1: Real-Time Tracking</div>
+              <div className="mock-box">Feature 2: Precision Heatmaps</div>
+              <div className="mock-box">Feature 3: Privacy First</div>
+            </div>
           </div>
-        </div>
+        )}
 
         {/* Hover Tooltip */}
         {hoveredClick && (
           <div
             className="heatmap-tooltip"
             style={{
-              left: `${hoveredClick.screenX + 15}px`,
-              top: `${hoveredClick.screenY - 15}px`
+              left: `${Math.min(hoveredClick.screenX + 15, (containerRef.current?.clientWidth || 800) - 220)}px`,
+              top: `${Math.max(10, hoveredClick.screenY - 15)}px`
             }}
           >
             <div className="font-bold text-xs text-slate-100 mb-0.5">
               Click: ({hoveredClick.clickCoordinates?.x}, {hoveredClick.clickCoordinates?.y})
             </div>
             {hoveredClick.targetText && (
-              <div className="text-xs text-indigo-200 truncate">
+              <div className="text-xs text-indigo-200 truncate font-semibold">
                 Target: "{hoveredClick.targetText}"
               </div>
             )}
-            <div className="text-[10px] text-slate-400 mt-1">
-              Session: {hoveredClick.sessionId?.substring(0, 12)}...
+            {hoveredClick.pageUrl && (
+              <div className="text-[10px] text-slate-300 truncate mt-0.5">
+                Page: {hoveredClick.pageUrl.replace('http://127.0.0.1:5000', '')}
+              </div>
+            )}
+            <div className="text-[10px] text-slate-400 mt-1 font-mono">
+              Session: {hoveredClick.sessionId?.substring(0, 14)}...
             </div>
           </div>
         )}
@@ -244,7 +304,7 @@ export default function ClickHeatmap({ pages = [], clicks = [], selectedPage, on
       <div className="card-footer flex justify-between items-center text-xs text-slate-500 pt-3 border-t">
         <span className="flex items-center gap-1.5">
           <Info size={14} className="text-slate-400" />
-          Showing <strong>{clicks.length}</strong> recorded clicks. Density increases with overlapping click coordinates.
+          Showing <strong>{clicks.length}</strong> recorded clicks on {selectedPage ? (isPricingPage ? 'Pricing Page' : 'Home Page') : 'All Tracked Pages'}.
         </span>
         <div className="flex items-center gap-2">
           <span className="flex items-center gap-1 text-[11px]">

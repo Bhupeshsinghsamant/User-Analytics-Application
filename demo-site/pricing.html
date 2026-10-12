@@ -3,17 +3,19 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>CausalFunnel Demo Store - Pricing</title>
+    <title>CausalFunnel Analytics Demo - Pricing</title>
     <style>
         :root {
             --primary: #4f46e5;
             --primary-hover: #4338ca;
+            --primary-light: #e0e7ff;
             --bg: #f8fafc;
             --card-bg: #ffffff;
             --text-main: #0f172a;
             --text-muted: #64748b;
             --border: #e2e8f0;
             --accent: #10b981;
+            --accent-light: #d1fae5;
         }
         * {
             box-sizing: border-box;
@@ -27,6 +29,7 @@
             min-height: 100vh;
             display: flex;
             flex-direction: column;
+            line-height: 1.5;
         }
         header {
             background: var(--card-bg);
@@ -37,15 +40,17 @@
             align-items: center;
             position: sticky;
             top: 0;
-            z-index: 50;
+            z-index: 40;
+            box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.04);
         }
         .logo {
             font-size: 1.25rem;
-            font-weight: 700;
+            font-weight: 800;
             color: var(--primary);
             display: flex;
             align-items: center;
-            gap: 0.5rem;
+            gap: 0.6rem;
+            letter-spacing: -0.02em;
         }
         nav {
             display: flex;
@@ -55,130 +60,363 @@
         nav a {
             text-decoration: none;
             color: var(--text-muted);
-            font-weight: 500;
+            font-weight: 600;
+            font-size: 0.925rem;
             transition: color 0.15s;
         }
         nav a:hover, nav a.active {
             color: var(--primary);
         }
+        .nav-btn {
+            background: var(--primary-light);
+            color: var(--primary);
+            padding: 0.5rem 1rem;
+            border-radius: 0.5rem;
+            text-decoration: none;
+            font-size: 0.875rem;
+            font-weight: 700;
+            transition: all 0.2s;
+        }
+        .nav-btn:hover {
+            background: var(--primary);
+            color: white;
+        }
         .container {
             max-width: 1100px;
-            margin: 3rem auto;
+            margin: 3.5rem auto 2rem;
             padding: 0 2rem;
             text-align: center;
+            flex-grow: 1;
+            width: 100%;
         }
         h1 {
-            font-size: 2.5rem;
+            font-size: 2.75rem;
             font-weight: 800;
-            margin-bottom: 0.5rem;
+            letter-spacing: -0.03em;
+            margin-bottom: 0.75rem;
+            color: var(--text-main);
         }
-        p.subtitle {
+        .subtitle {
+            font-size: 1.15rem;
             color: var(--text-muted);
-            font-size: 1.125rem;
+            margin-bottom: 2rem;
+            max-width: 620px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        /* Billing Toggle */
+        .billing-toggle-container {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 1rem;
             margin-bottom: 3rem;
         }
+        .toggle-label {
+            font-size: 0.95rem;
+            font-weight: 700;
+            color: var(--text-muted);
+            cursor: pointer;
+        }
+        .toggle-label.active {
+            color: var(--primary);
+        }
+        .toggle-switch {
+            width: 52px;
+            height: 28px;
+            background: var(--primary);
+            border-radius: 9999px;
+            position: relative;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+        .toggle-switch::after {
+            content: '';
+            position: absolute;
+            top: 3px;
+            left: 3px;
+            width: 22px;
+            height: 22px;
+            background: white;
+            border-radius: 50%;
+            transition: transform 0.2s;
+        }
+        .toggle-switch.annual::after {
+            transform: translateX(24px);
+        }
+        .discount-badge {
+            background: #dcfce7;
+            color: #15803d;
+            font-size: 0.75rem;
+            font-weight: 800;
+            padding: 0.2rem 0.5rem;
+            border-radius: 9999px;
+            margin-left: 0.25rem;
+        }
+
+        /* Pricing Grid */
         .pricing-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            grid-template-columns: repeat(auto-fit, minmax(310px, 1fr));
             gap: 2rem;
-            text-align: left;
+            align-items: stretch;
+            margin-bottom: 4rem;
         }
         .pricing-card {
             background: var(--card-bg);
             border: 1px solid var(--border);
             border-radius: 1rem;
             padding: 2.5rem 2rem;
-            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+            text-align: left;
             position: relative;
-            transition: transform 0.2s, box-shadow 0.2s;
+            display: flex;
+            flex-direction: column;
+            transition: all 0.25s;
+            box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.05);
         }
         .pricing-card:hover {
-            transform: translateY(-4px);
-            box-shadow: 0 10px 20px -3px rgba(0, 0, 0, 0.1);
+            transform: translateY(-5px);
+            box-shadow: 0 16px 24px -6px rgba(0, 0, 0, 0.1);
+            border-color: #cbd5e1;
         }
         .pricing-card.popular {
             border: 2px solid var(--primary);
+            box-shadow: 0 10px 25px -5px rgba(79, 70, 229, 0.15);
         }
         .popular-badge {
             position: absolute;
-            top: -12px;
+            top: -14px;
             left: 50%;
             transform: translateX(-50%);
             background: var(--primary);
             color: white;
-            padding: 0.25rem 0.75rem;
-            border-radius: 9999px;
+            padding: 0.35rem 1rem;
             font-size: 0.75rem;
-            font-weight: 700;
+            font-weight: 800;
+            letter-spacing: 0.05em;
             text-transform: uppercase;
+            border-radius: 9999px;
+        }
+        .pricing-card h3 {
+            font-size: 1.5rem;
+            font-weight: 800;
+            margin-bottom: 0.4rem;
+        }
+        .pricing-card .desc {
+            color: var(--text-muted);
+            font-size: 0.925rem;
+            margin-bottom: 1.5rem;
         }
         .price {
-            font-size: 2.25rem;
+            font-size: 2.75rem;
             font-weight: 800;
-            margin: 1rem 0 1.5rem;
+            margin-bottom: 1.75rem;
+            display: flex;
+            align-items: baseline;
+            gap: 0.35rem;
+            letter-spacing: -0.03em;
         }
         .price span {
             font-size: 1rem;
             color: var(--text-muted);
-            font-weight: 400;
+            font-weight: 500;
+            letter-spacing: normal;
         }
         .features-list {
             list-style: none;
             margin-bottom: 2rem;
+            flex-grow: 1;
         }
         .features-list li {
-            padding: 0.5rem 0;
-            color: var(--text-muted);
+            padding: 0.55rem 0;
+            color: var(--text-main);
             font-size: 0.95rem;
             display: flex;
             align-items: center;
-            gap: 0.5rem;
+            gap: 0.65rem;
         }
         .features-list li::before {
             content: "✓";
             color: var(--accent);
-            font-weight: 700;
+            font-weight: 800;
         }
         .btn {
             width: 100%;
-            padding: 0.75rem 1rem;
+            padding: 0.85rem 1.25rem;
             font-size: 1rem;
-            font-weight: 600;
+            font-weight: 700;
             border-radius: 0.5rem;
             cursor: pointer;
             transition: all 0.2s;
             border: none;
             text-align: center;
+            user-select: none;
         }
         .btn-primary {
             background: var(--primary);
             color: white;
+            box-shadow: 0 4px 10px rgba(79, 70, 229, 0.25);
         }
         .btn-primary:hover {
             background: var(--primary-hover);
+            transform: translateY(-2px);
         }
         .btn-outline {
             background: transparent;
             color: var(--primary);
-            border: 1px solid var(--primary);
+            border: 1.5px solid var(--primary);
         }
         .btn-outline:hover {
-            background: #eff6ff;
+            background: var(--primary-light);
+            transform: translateY(-2px);
         }
+
+        /* FAQ Accordion on Pricing */
+        .faq-section {
+            max-width: 860px;
+            margin: 2rem auto 4rem;
+            text-align: left;
+        }
+        .faq-section h2 {
+            text-align: center;
+            font-size: 2rem;
+            font-weight: 800;
+            margin-bottom: 2rem;
+        }
+        .faq-item {
+            background: white;
+            border: 1px solid var(--border);
+            border-radius: 0.5rem;
+            margin-bottom: 0.85rem;
+            overflow: hidden;
+            transition: border-color 0.2s;
+        }
+        .faq-question {
+            padding: 1.25rem 1.5rem;
+            font-weight: 700;
+            cursor: pointer;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            user-select: none;
+        }
+        .faq-question span.icon {
+            font-size: 1.25rem;
+            color: var(--primary);
+            transition: transform 0.2s;
+        }
+        .faq-answer {
+            padding: 0 1.5rem 1.25rem;
+            color: var(--text-muted);
+            font-size: 0.95rem;
+            line-height: 1.6;
+            display: none;
+        }
+        .faq-item.open .faq-answer {
+            display: block;
+        }
+        .faq-item.open .faq-question span.icon {
+            transform: rotate(45deg);
+        }
+
+        /* Live Tracker Toast */
         #cf-toast {
             position: fixed;
             bottom: 1.5rem;
             right: 1.5rem;
-            background: #1e293b;
+            background: #0f172a;
             color: #f8fafc;
-            padding: 0.85rem 1.25rem;
-            border-radius: 0.5rem;
-            font-size: 0.875rem;
-            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.2);
+            padding: 1rem 1.5rem;
+            border-radius: 0.75rem;
+            font-size: 0.9rem;
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.3), 0 8px 10px -6px rgba(0, 0, 0, 0.2);
             display: none;
-            z-index: 100;
+            z-index: 1000;
             border-left: 4px solid var(--accent);
+            animation: slideUp 0.25s ease-out;
+            max-width: 380px;
+            text-align: left;
         }
+        @keyframes slideUp {
+            from { opacity: 0; transform: translateY(16px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        #cf-toast strong {
+            color: #38bdf8;
+        }
+        #cf-toast a {
+            color: #a7f3d0;
+            text-decoration: underline;
+            font-weight: 600;
+            display: inline-block;
+            margin-top: 0.35rem;
+        }
+
+        /* Modal Dialog */
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(15, 23, 42, 0.6);
+            backdrop-filter: blur(4px);
+            display: none;
+            justify-content: center;
+            align-items: center;
+            z-index: 999;
+            padding: 1.5rem;
+        }
+        .modal-card {
+            background: white;
+            border-radius: 1rem;
+            max-width: 480px;
+            width: 100%;
+            padding: 2.25rem;
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+            position: relative;
+            text-align: left;
+            animation: zoomIn 0.2s ease-out;
+        }
+        @keyframes zoomIn {
+            from { opacity: 0; transform: scale(0.95); }
+            to { opacity: 1; transform: scale(1); }
+        }
+        .modal-close-btn {
+            position: absolute;
+            top: 1.25rem;
+            right: 1.25rem;
+            background: none;
+            border: none;
+            font-size: 1.5rem;
+            color: #94a3b8;
+            cursor: pointer;
+            padding: 0.25rem 0.5rem;
+            border-radius: 0.375rem;
+        }
+        .modal-close-btn:hover {
+            color: #0f172a;
+            background: #f1f5f9;
+        }
+        .modal-card h3 {
+            font-size: 1.5rem;
+            font-weight: 800;
+            margin-bottom: 0.5rem;
+        }
+        .modal-card p {
+            color: var(--text-muted);
+            margin-bottom: 1.5rem;
+            font-size: 0.95rem;
+        }
+        .plan-summary-box {
+            background: #f8fafc;
+            border: 1px solid var(--border);
+            border-radius: 0.5rem;
+            padding: 1rem 1.25rem;
+            margin-bottom: 1.5rem;
+        }
+
         footer {
             margin-top: auto;
             padding: 2rem;
@@ -186,6 +424,7 @@
             border-top: 1px solid var(--border);
             color: var(--text-muted);
             font-size: 0.875rem;
+            background: white;
         }
     </style>
 </head>
@@ -198,54 +437,124 @@
         <nav>
             <a href="index.html">Home</a>
             <a href="pricing.html" class="active">Pricing</a>
-            <a href="http://localhost:5173" target="_blank" style="color: var(--primary); font-weight: 600;">Open Dashboard ↗</a>
+            <a href="http://localhost:5173" target="_blank" class="nav-btn">Open Dashboard ↗</a>
         </nav>
     </header>
 
     <div class="container">
         <h1>Transparent, Predictable Pricing</h1>
-        <p class="subtitle">Pick a plan to test tracking user decisions and conversion interest.</p>
+        <p class="subtitle">Choose a plan to test user conversion intent and subscription tracking in MongoDB Atlas.</p>
+
+        <!-- Interactive Billing Toggle -->
+        <div class="billing-toggle-container">
+            <span id="label-monthly" class="toggle-label active" onclick="setBilling(false)">Monthly Billing</span>
+            <div id="billing-switch" class="toggle-switch" onclick="toggleBilling()"></div>
+            <span id="label-annual" class="toggle-label" onclick="setBilling(true)">Annual Billing <span class="discount-badge">Save 20%</span></span>
+        </div>
 
         <div class="pricing-grid">
             <!-- Free Tier -->
             <div class="pricing-card">
                 <h3>Starter</h3>
-                <p style="color: var(--text-muted);">For personal projects and testing.</p>
+                <p class="desc">For personal projects and testing.</p>
                 <div class="price">₹0 <span>/ month</span></div>
                 <ul class="features-list">
                     <li>Up to 10,000 monthly events</li>
                     <li>7-day data retention</li>
                     <li>Standard click heatmaps</li>
+                    <li>Basic session journeys</li>
                 </ul>
-                <button id="btn-plan-starter" class="btn btn-outline">Choose Starter</button>
+                <button id="btn-plan-starter" class="btn btn-outline" onclick="openPlanModal('Starter', '₹0')">
+                    Choose Starter
+                </button>
             </div>
 
             <!-- Pro Tier -->
             <div class="pricing-card popular">
                 <div class="popular-badge">Most Popular</div>
                 <h3>Professional</h3>
-                <p style="color: var(--text-muted);">For growing apps and marketing teams.</p>
-                <div class="price">₹1,999 <span>/ month</span></div>
+                <p class="desc">For growing apps and marketing teams.</p>
+                <div class="price" id="pro-price-display">₹1,999 <span>/ month</span></div>
                 <ul class="features-list">
                     <li>Up to 500,000 monthly events</li>
                     <li>90-day data retention</li>
                     <li>High-density precision heatmaps</li>
                     <li>Full session timeline inspector</li>
+                    <li>Export coordinates to CSV/JSON</li>
                 </ul>
-                <button id="btn-plan-pro" class="btn btn-primary">Choose Professional</button>
+                <button id="btn-plan-pro" class="btn btn-primary" onclick="openPlanModal('Professional', isAnnual ? '₹1,599' : '₹1,999')">
+                    Choose Professional
+                </button>
             </div>
 
             <!-- Enterprise Tier -->
             <div class="pricing-card">
                 <h3>Enterprise</h3>
-                <p style="color: var(--text-muted);">For large platforms needing scale.</p>
-                <div class="price">Custom</div>
+                <p class="desc">For large platforms needing scale.</p>
+                <div class="price">Custom <span>/ contact</span></div>
                 <ul class="features-list">
-                    <li>Unlimited events</li>
+                    <li>Unlimited events & tracking</li>
                     <li>Custom retention window</li>
-                    <li>Dedicated cluster isolation</li>
+                    <li>Dedicated MongoDB cluster</li>
+                    <li>SLA & 24/7 dedicated support</li>
                 </ul>
-                <button id="btn-plan-enterprise" class="btn btn-outline">Contact Sales</button>
+                <button id="btn-plan-enterprise" class="btn btn-outline" onclick="openPlanModal('Enterprise', 'Custom')">
+                    Contact Sales
+                </button>
+            </div>
+        </div>
+
+        <!-- FAQ Section -->
+        <section class="faq-section">
+            <h2>Pricing Questions Answered</h2>
+
+            <div class="faq-item" onclick="toggleFaq(this)">
+                <div class="faq-question">
+                    <span>Can I upgrade or downgrade anytime?</span>
+                    <span class="icon">+</span>
+                </div>
+                <div class="faq-answer">
+                    Yes! You can switch between Starter and Professional anytime. Your events are never lost and continue to persist safely in MongoDB Atlas.
+                </div>
+            </div>
+
+            <div class="faq-item" onclick="toggleFaq(this)">
+                <div class="faq-question">
+                    <span>Are there any hidden overage fees?</span>
+                    <span class="icon">+</span>
+                </div>
+                <div class="faq-answer">
+                    None at all. If you exceed event quotas, you receive friendly dashboard alerts with no sudden credit card charges.
+                </div>
+            </div>
+        </section>
+    </div>
+
+    <!-- Plan Checkout Modal Dialog -->
+    <div id="modal-checkout" class="modal-overlay" onclick="closeModalOnOverlay(event, 'modal-checkout')">
+        <div class="modal-card">
+            <button class="modal-close-btn" onclick="closeModal('modal-checkout')">&times;</button>
+            <div id="checkout-form-view">
+                <h3 id="checkout-title">Select Plan</h3>
+                <p>Confirm your plan choice to log conversion decision events.</p>
+                <div class="plan-summary-box">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.5rem;">
+                        <strong id="summary-plan-name" style="font-size: 1.1rem;">Professional Plan</strong>
+                        <span id="summary-plan-price" style="font-size: 1.1rem; font-weight: 800; color: var(--primary);">₹1,999 / mo</span>
+                    </div>
+                    <small style="color: var(--text-muted);">Includes full Heatmap inspection and session timelines.</small>
+                </div>
+                <button class="btn btn-primary" onclick="confirmSubscription()" style="width: 100%; justify-content: center;">
+                    Confirm & Activate Plan
+                </button>
+            </div>
+            <div id="checkout-success-view" style="display: none; text-align: center; padding: 1.5rem 0;">
+                <div style="font-size: 3rem; margin-bottom: 0.75rem;">🎉</div>
+                <h3 style="margin-bottom: 0.5rem;">Plan Activated!</h3>
+                <p style="color: #059669; margin-bottom: 1.5rem;">Your conversion event was recorded and is now inspectable on the live React dashboard.</p>
+                <button class="btn btn-primary" onclick="closeModal('modal-checkout')" style="width: 100%; justify-content: center;">
+                    Done
+                </button>
             </div>
         </div>
     </div>
@@ -261,16 +570,74 @@
     <script src="../tracker/tracker.js" data-api-url="http://127.0.0.1:5000/api"></script>
 
     <script>
+        var isAnnual = false;
+
+        function setBilling(annual) {
+            isAnnual = annual;
+            var toggle = document.getElementById('billing-switch');
+            var proPrice = document.getElementById('pro-price-display');
+            var lblMonthly = document.getElementById('label-monthly');
+            var lblAnnual = document.getElementById('label-annual');
+
+            if (isAnnual) {
+                toggle.classList.add('annual');
+                lblAnnual.classList.add('active');
+                lblMonthly.classList.remove('active');
+                proPrice.innerHTML = '₹1,599 <span>/ month</span>';
+            } else {
+                toggle.classList.remove('annual');
+                lblMonthly.classList.add('active');
+                lblAnnual.classList.remove('active');
+                proPrice.innerHTML = '₹1,999 <span>/ month</span>';
+            }
+        }
+
+        function toggleBilling() {
+            setBilling(!isAnnual);
+        }
+
+        function toggleFaq(item) {
+            item.classList.toggle('open');
+        }
+
+        function openPlanModal(name, price) {
+            document.getElementById('checkout-form-view').style.display = 'block';
+            document.getElementById('checkout-success-view').style.display = 'none';
+            document.getElementById('checkout-title').innerText = 'Confirm ' + name + ' Plan';
+            document.getElementById('summary-plan-name').innerText = name + ' Plan';
+            document.getElementById('summary-plan-price').innerText = price + (name === 'Enterprise' ? '' : ' / mo');
+            document.getElementById('modal-checkout').style.display = 'flex';
+        }
+
+        function confirmSubscription() {
+            document.getElementById('checkout-form-view').style.display = 'none';
+            document.getElementById('checkout-success-view').style.display = 'block';
+        }
+
+        function closeModal(id) {
+            document.getElementById(id).style.display = 'none';
+        }
+
+        function closeModalOnOverlay(e, id) {
+            if (e.target.id === id) {
+                closeModal(id);
+            }
+        }
+
+        // Toast feedback listener
         window.addEventListener('cf:click_tracked', function(e) {
             var toast = document.getElementById('cf-toast');
             if (toast) {
                 var coords = e.detail.clickCoordinates;
-                toast.innerHTML = '🎯 <strong>Click Captured:</strong> (' + coords.x + ', ' + coords.y + ')<br><small style="color: #94a3b8;">Plan: ' + (e.detail.targetText || e.detail.targetTag) + '</small>';
+                var elText = e.detail.targetText || e.detail.targetTag;
+                toast.innerHTML = '🎯 <strong>Click Captured:</strong> (' + coords.x + ', ' + coords.y + ')<br>' +
+                                  '<span style="color: #cbd5e1;">Target: "' + elText + '"</span><br>' +
+                                  '<a href="http://localhost:5173" target="_blank">View Live on Heatmap Dashboard ↗</a>';
                 toast.style.display = 'block';
                 clearTimeout(window.__toastTimeout);
                 window.__toastTimeout = setTimeout(function() {
                     toast.style.display = 'none';
-                }, 2500);
+                }, 3000);
             }
         });
     </script>
