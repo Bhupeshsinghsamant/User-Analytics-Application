@@ -1,31 +1,32 @@
-/**
- * CausalFunnel User Analytics Tracking SDK
+﻿/**
+ * User Analyser - Web Analytics Tracking SDK
  * Standalone Vanilla JavaScript SDK
  * 
  * Features:
  * - Tab-scoped session management via sessionStorage (reused across navigations)
  * - Automatic page_view event with deduplication
- * - Click tracking with exact coordinates, viewport dimensions, and normalized scaling
- * - Privacy-preserving: ignores passwords and sensitive inputs
+ * - Click tracking with document-relative coordinates, viewport dimensions, and normalized scaling
+ * - Privacy protection: ignores password/hidden inputs and elements marked with data-analytics-ignore
  * - Non-blocking: failures never crash or disrupt the host website
  */
 (function (window, document) {
     'use strict';
 
     // Prevent duplicate SDK initialization
-    if (window.__CF_TRACKER_INITIALIZED__) {
+    if (window.__USER_ANALYSER_INITIALIZED__ || window.__CF_TRACKER_INITIALIZED__) {
         return;
     }
+    window.__USER_ANALYSER_INITIALIZED__ = true;
     window.__CF_TRACKER_INITIALIZED__ = true;
 
     // Detect configuration from script tag attributes or global object
     var currentScript = document.currentScript;
     var configAttrUrl = currentScript ? currentScript.getAttribute('data-api-url') : null;
-    var globalConfig = window.CF_ANALYTICS_CONFIG || {};
+    var globalConfig = window.USER_ANALYSER_CONFIG || window.CF_ANALYTICS_CONFIG || {};
 
     var CONFIG = {
         apiUrl: (configAttrUrl || globalConfig.apiUrl || 'http://127.0.0.1:5000/api').replace(/\/+$/, ''),
-        sessionStorageKey: 'cf_analytics_session_id',
+        sessionStorageKey: globalConfig.sessionStorageKey || 'user_analyser_session_id',
         debug: Boolean(globalConfig.debug || false)
     };
 
@@ -34,7 +35,7 @@
      */
     function log(msg, data) {
         if (CONFIG.debug && window.console && console.log) {
-            console.log('[CF-Tracker] ' + msg, data || '');
+            console.log('[User Analyser] ' + msg, data || '');
         }
     }
 
@@ -53,8 +54,9 @@
      */
     function getSessionId() {
         try {
-            var existingSession = window.sessionStorage.getItem(CONFIG.sessionStorageKey);
+            var existingSession = window.sessionStorage.getItem(CONFIG.sessionStorageKey) || window.sessionStorage.getItem('cf_analytics_session_id');
             if (existingSession && existingSession.trim().length > 0) {
+                window.sessionStorage.setItem(CONFIG.sessionStorageKey, existingSession);
                 return existingSession;
             }
             var newSession = generateUUID();
@@ -62,10 +64,10 @@
             return newSession;
         } catch (e) {
             log('Storage access restricted, using memory session:', e);
-            if (!window.__cf_fallback_session_id) {
-                window.__cf_fallback_session_id = generateUUID();
+            if (!window.__user_analyser_fallback_session_id) {
+                window.__user_analyser_fallback_session_id = window.__cf_fallback_session_id || generateUUID();
             }
-            return window.__cf_fallback_session_id;
+            return window.__user_analyser_fallback_session_id;
         }
     }
 
@@ -184,7 +186,7 @@
             }
 
             var dims = getDimensions();
-            // Document-relative coordinates
+            // Document-relative coordinates including scroll offset
             var pageX = typeof e.pageX === 'number' ? e.pageX : (e.clientX + (document.documentElement.scrollLeft || document.body.scrollLeft || 0));
             var pageY = typeof e.pageY === 'number' ? e.pageY : (e.clientY + (document.documentElement.scrollTop || document.body.scrollTop || 0));
 
@@ -208,8 +210,9 @@
             log('Tracking click', payload);
             sendEvent(payload);
 
-            // Optional visual feedback event for demo/integration testing
+            // Dispatch visual feedback events (User Analyser with backward-compatible alias)
             if (window.dispatchEvent && window.CustomEvent) {
+                window.dispatchEvent(new CustomEvent('user_analyser:click_tracked', { detail: payload }));
                 window.dispatchEvent(new CustomEvent('cf:click_tracked', { detail: payload }));
             }
         } catch (err) {
@@ -235,12 +238,15 @@
         init();
     }
 
-    // Expose minimal programmatic API
-    window.CausalFunnelTracker = {
+    // Expose programmatic API with backward-compatible aliases
+    var publicApi = {
         getSessionId: getSessionId,
         trackPageView: trackPageView,
         trackEvent: sendEvent,
         getConfig: function () { return CONFIG; }
     };
+
+    window.UserAnalyserTracker = publicApi;
+    window.CausalFunnelTracker = publicApi;
 
 })(window, document);

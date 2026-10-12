@@ -78,7 +78,7 @@ def test_mongodb_connection():
     except ServerSelectionTimeoutError as e:
         print("\n[FAIL] Connection timed out after 5 seconds.")
         print("\nPossible reasons:")
-        print("1. IP Whitelist: Go to MongoDB Atlas -> Network Access -> Add IP Address -> '0.0.0.0/0' (Allow Access From Anywhere).")
+        print("1. IP Access List: In MongoDB Atlas -> Network Access, ensure your current IP address is added (click 'Add Current IP Address').")
         print("2. Internet connection is blocking MongoDB Atlas port (27017 / SRV DNS).")
         return False
 

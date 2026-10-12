@@ -57,7 +57,7 @@ def ping_db():
         client.admin.command("ping")
         return True, "Connected successfully to MongoDB Atlas."
     except ServerSelectionTimeoutError:
-        return False, "Connection timed out. Check Network Access (IP Whitelist 0.0.0.0/0) in MongoDB Atlas."
+        return False, "Connection timed out. Check Network Access in MongoDB Atlas to ensure your current IP address is allowed."
     except ConnectionFailure as e:
         return False, f"Connection failed: {str(e)}"
     except Exception as e:

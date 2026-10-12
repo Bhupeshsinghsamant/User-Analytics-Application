@@ -7,7 +7,7 @@ ALLOWED_EVENT_TYPES = {"page_view", "click"}
 
 def validate_event_payload(payload):
     """
-    Validates the event payload according to assignment specifications.
+    Validates the event payload according to User Analyser schema specifications.
     Returns (is_valid: bool, error_message: str or None, sanitized_payload: dict or None).
     """
     if not isinstance(payload, dict):

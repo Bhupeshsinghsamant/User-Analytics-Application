@@ -1,6 +1,6 @@
 ﻿# User Analyser
 
-A modern, high-performance, full-stack web analytics and session intelligence platform. User Analyser provides end-to-end visibility into user interactions through privacy-first client tracking, low-latency event ingestion, persistent session mapping, and interactive click heatmaps.
+A modern, full-stack web analytics and session intelligence platform. User Analyser provides real-time visibility into user interactions through client-side event tracking, schema-validated REST APIs, persistent cloud database storage, and interactive click heatmaps.
 
 ---
 
@@ -8,10 +8,10 @@ A modern, high-performance, full-stack web analytics and session intelligence pl
 
 Modern digital products often struggle with web analytics solutions that are either overly complex, slow, invasive to user privacy, or prohibitively expensive for early-stage teams. Traditional analytics suites inject heavy tracking scripts that impact Core Web Vitals, sample event data unpredictably, and obscure raw interaction coordinates behind opaque metrics.
 
-**User Analyser** solves this by providing a lightweight, transparent, full-stack analytics pipeline:
-- **Zero-Dependency Client SDK**: Ultra-compact vanilla JavaScript tracker (`tracker.js`) that captures session journeys and click coordinates without degrading page performance.
+**User Analyser** provides a lightweight, transparent, full-stack analytics pipeline:
+- **Zero-Dependency Client SDK**: Ultra-compact vanilla JavaScript tracker (`tracker.js`, ~7 KB) that captures session journeys and click coordinates without degrading host page performance.
 - **High-Throughput Validation API**: Python Flask REST backend enforcing strict schema validation and batch ingestion.
-- **Scalable Document Persistence**: MongoDB Atlas free-tier (M0) compatible cluster with optimized compound indexing.
+- **Scalable Document Persistence**: MongoDB Atlas free-tier (M0) compatible cluster with compound indexing on sessions and events.
 - **Actionable Visual Dashboard**: React + Vite interface offering real-time metric counters, granular session inspection, and normalized HTML5 Canvas click heatmaps.
 
 ---
@@ -20,11 +20,11 @@ Modern digital products often struggle with web analytics solutions that are eit
 
 | Layer | Technologies | Key Capabilities |
 |---|---|---|
-| **Client SDK** | Vanilla JavaScript (ES6+) | Zero external dependencies, non-blocking, ~7 KB, sessionStorage session persistence, automatic PII masking |
+| **Client SDK** | Vanilla JavaScript (ES6+) | Zero external dependencies, non-blocking, ~7 KB, sessionStorage session persistence, sensitive input exclusion |
 | **Backend API** | Python 3.10+, Flask 3.1, PyMongo 4.11 | RESTful design, strict schema validation, CORS configuration, batch processing, TLS database connection |
 | **Database** | MongoDB Atlas (Cloud M0 / Local 7.0+) | Document storage, compound indexes on `(sessionId, timestamp)` and `(pageUrl, eventType)`, aggregation pipelines |
 | **Frontend Dashboard** | React 19, Vite, Lucide Icons, CSS3 | Real-time KPI cards, searchable sessions table, chronological journey inspector, interactive HTML5 Canvas heatmap |
-| **Testing & Tooling** | pytest, Vite build engine, Git | 12 automated unit and integration tests, production build verification |
+| **Testing & Tooling** | pytest, Vite build engine, oxlint, Git | 12 automated unit and integration tests, production build verification, fast linting |
 
 ---
 
@@ -41,7 +41,7 @@ Modern digital products often struggle with web analytics solutions that are eit
 ┌────────────────────────────────────────────────────────┐
 │              Flask REST API (Python 3.10+)             │
 │    - JSON Schema Validation                            │
-│    - PII & Sensitive Input Masking Guard               │
+│    - Sensitive Input Filtering & Metadata Capture      │
 │    - CORS & Batch Event Processing                     │
 └───────────────────────────┬────────────────────────────┘
                             │
@@ -50,7 +50,7 @@ Modern digital products often struggle with web analytics solutions that are eit
 ┌────────────────────────────────────────────────────────┐
 │              MongoDB Atlas Cloud Cluster               │
 │    - 'events' Collection (Indexed by session, time)    │
-│    - 'sessions' Aggregation Pipeline                   │
+│    - 'sessions' Collection (Aggregated summaries)      │
 └───────────────────────────┬────────────────────────────┘
                             │
                             │ GET /api/sessions, /api/events/clicks, /api/stats/overview
@@ -69,15 +69,15 @@ Modern digital products often struggle with web analytics solutions that are eit
 ## How It Works (Step-by-Step Flow)
 
 1. **Client-Side Tracking**:
-   The lightweight tracker script (`tracker.js`) is embedded onto any webpage before `</body>`. On page load, it checks `sessionStorage` for an existing session or generates a unique `sessionId` (e.g., `sess_...`). It automatically records a `page_view` event.
+   The standalone tracker script (`tracker.js`) is embedded before the closing `</body>` tag of any HTML page. On page load, it checks `sessionStorage` for an existing session or generates a unique `sessionId` (e.g., `sess_...`). It automatically records a `page_view` event.
 2. **Interaction Capture & Coordinate Normalization**:
-   When visitors interact with buttons, links, or navigation items, a global listener captures exact `(x, y)` document coordinates and viewport dimensions (`width`, `height`). Form fields containing sensitive values (passwords, tokens) are automatically ignored.
+   When visitors interact with buttons, links, or navigation items, a global click listener captures document-relative `(x, y)` coordinates and viewport dimensions (`width`, `height`). Password and hidden fields are automatically bypassed.
 3. **Event Ingestion & Validation**:
    Events are posted asynchronously to the Flask backend (`POST /api/events`). The API validates the JSON payload structure against required schemas and returns HTTP 201.
 4. **Cloud Persistence (MongoDB Atlas)**:
    Validated events are saved in the `events` collection. Compound database indexes (`sessionId` + `timestamp` and `pageUrl` + `eventType`) ensure fast query execution.
 5. **Session Aggregation**:
-   The backend aggregates raw events by `sessionId`, computing total interactions, click counts, entry points, and latest activity timestamps.
+   The backend pipeline upserts session summaries in the `sessions` collection, calculating total interactions, click counts, entry points, and latest activity timestamps.
 6. **Live Visualization (React Dashboard)**:
    The React dashboard polls aggregated data from the Flask API:
    - **Overview KPI Cards**: Displays real-time counts for active sessions, total events, page views, and clicks.
@@ -86,14 +86,48 @@ Modern digital products often struggle with web analytics solutions that are eit
 
 ---
 
-## Core Features
+## Coordinate Capture & Heatmap Mechanics
 
-- **Full Data Ownership**: Complete control of your interaction data with direct database access and zero vendor lock-in.
-- **Privacy-Preserving Tracking SDK**: Automatically ignores input fields with sensitive types (e.g., passwords, authorization tokens) and isolates tracking errors so host applications never crash.
-- **Session Continuity**: Retains unique session tokens across internal page navigations via `sessionStorage` with automatic deduplication.
-- **Precision Normalized Heatmaps**: Captures both viewport dimensions and page coordinates, calculating relative percentages (`0.0` - `1.0`) so clicks align across diverse screen resolutions.
-- **Chronological Session Inspector**: Inspects visitor paths, viewing the sequence of visited pages and clicked elements in real time.
-- **Live Health Monitoring**: Instant database connectivity checks with automatic status polling.
+To ensure click heatmaps display consistently across varying window sizes:
+- **Document-Relative Coordinates**: The tracker records `pageX` and `pageY`, accounting for horizontal and vertical scrolling (`scrollLeft`, `scrollTop`).
+- **Viewport Dimensions**: The tracker captures the browser window dimensions (`viewport: { width, height }`) at the time of the click.
+- **Backend Normalization**: During event validation, the backend calculates proportional coordinates bounded between `0.0` and `1.0`:
+  - `normalizedCoordinates.x = round(min(max(pageX / viewport.width, 0.0), 1.0), 4)`
+  - `normalizedCoordinates.y = round(min(max(pageY / viewport.height, 0.0), 1.0), 4)`
+- **Heatmap Canvas Scaling**: On the React dashboard, coordinates scale proportionally to the canvas dimensions:
+  - `display_x = normalized_x * canvas_width`
+  - `display_y = normalized_y * canvas_height`
+- **Note on Scrollable Pages**: Clicks that occur below the initial viewport fold (`pageY > viewport.height`) will normalize with `y = 1.0`. Heatmap canvas previews are therefore aligned to the primary viewport / page fold dimensions.
+
+---
+
+## Privacy, Sensitive Input Exclusions & Network Logging
+
+- **Sensitive Input Exclusions**:
+  The client SDK checks target elements before capturing clicks. It will **not** track clicks on:
+  - Form input elements with `type="password"` or `type="hidden"`.
+  - Any DOM element explicitly marked with `data-analytics-ignore` or `data-private`.
+  *Note*: The SDK does not perform automatic natural-language PII redaction on general text inputs. Developers should annotate sensitive input elements with `data-analytics-ignore`.
+- **Client Network & Device Metadata**:
+  During event ingestion, the Flask backend records:
+  - **Client IP Address**: Extracted from `request.remote_addr` (stored on each event document).
+  - **User-Agent**: Extracted from `request.headers.get("User-Agent")` (stored on event documents and session summaries).
+
+---
+
+## Local Development vs. Production Deployment
+
+- **Local Development**:
+  The project is preconfigured to run locally with `http://127.0.0.1:5000/api` for the backend and `http://localhost:5173` for the React dashboard.
+- **Production Deployment Requirements**:
+  To deploy the application to a public production environment:
+  1. Host the Flask API behind a production WSGI server (e.g., Gunicorn) and reverse proxy (e.g., Nginx) with a valid SSL/TLS certificate (HTTPS).
+  2. In `backend/app/__init__.py`, update `CORS(app, origins=[...])` from wildcard `*` to whitelist only your production web application domains.
+  3. In your client website script tags, update `data-api-url` to your public HTTPS endpoint:
+     ```html
+     <script src="https://yourdomain.com/tracker/tracker.js" data-api-url="https://yourdomain.com/api"></script>
+     ```
+  *Note*: This repository does not automatically deploy to any public cloud host and does not initiate paid services.
 
 ---
 
@@ -161,7 +195,7 @@ User Analytics Application/
 1. Create a free account at [MongoDB Atlas](https://www.mongodb.com/cloud/atlas).
 2. Deploy a free **M0 Sandbox** cluster (no credit card required).
 3. Under **Database Access**, create a database user with **Read and write to any database** permissions.
-4. Under **Network Access**, click **Add IP Address** and choose `0.0.0.0/0` (Allow Access from Anywhere) to permit local development access.
+4. Under **Network Access**, click **Add IP Address** and select **Add Current IP Address** to securely whitelist your local IP for development. (Avoid using `0.0.0.0/0` in production environments).
 5. In **Database Deployments**, click **Connect** -> **Drivers** -> **Python** and copy your connection string.
 
 ### 2. Environment Configuration
@@ -260,25 +294,10 @@ python -m http.server 5500
 
 ---
 
-## Coordinate System & Heatmap Alignment
-
-To ensure click heatmaps remain aligned across different screen resolutions and window resizes, the tracker captures:
-- `clickCoordinates: { x, y }` — Document-relative coordinates (`pageX`, `pageY`).
-- `viewport: { width, height }` — Browser window dimensions at the time of click.
-- `normalizedCoordinates: { x, y }` — Proportional values computed as `x / viewport.width` and `y / viewport.height` (bounded between `0.0` and `1.0`).
-
-On the React Heatmap Canvas:
-- `display_x = normalized_x * canvas_width`
-- `display_y = normalized_y * canvas_height`
-
-This ensures that clicks recorded on varying displays (e.g., 1920×1080 or 1366×768) scale accurately to match the corresponding UI elements on the dashboard preview canvas.
-
----
-
 ## REST API Reference
 
 ### 1. Ingest Event
-- **Endpoint**: `POST /api/events` (alias: `/api/track`)
+- **Endpoint**: `POST /api/events` (alias: `POST /api/track`)
 - **Request Body**:
 ```json
 {
@@ -365,7 +384,25 @@ This ensures that clicks recorded on varying displays (e.g., 1920×1080 or 1366�
 }
 ```
 
-### 5. Health Check
+### 5. Overall Platform Statistics
+- **Endpoint**: `GET /api/stats/overview`
+- **Response** (`200 OK`):
+```json
+{
+  "success": true,
+  "totalSessions": 12,
+  "totalEvents": 48,
+  "totalClicks": 30,
+  "totalPageViews": 18,
+  "uniquePagesCount": 2,
+  "uniquePages": [
+    "http://127.0.0.1:5500/demo-site/index.html",
+    "http://127.0.0.1:5500/demo-site/pricing.html"
+  ]
+}
+```
+
+### 6. Health Check
 - **Endpoint**: `GET /api/health`
 - **Response** (`200 OK`):
 ```json
@@ -404,7 +441,7 @@ tests/test_api.py::test_track_invalid_body PASSED                        [ 83%]
 tests/test_api.py::test_404_handler PASSED                               [ 91%]
 tests/test_integration.py::test_live_integration_pipeline PASSED         [100%]
 
-======================== 12 passed in 6.41s ========================
+======================== 12 passed in 4.52s ========================
 ```
 
 ### Frontend Production Build
@@ -427,6 +464,15 @@ dist/assets/index-r6Hif0un.css    8.63 kB │ gzip:  2.43 kB
 dist/assets/index-Bsh1v1dX.js   248.80 kB │ gzip: 77.46 kB
 ✓ built in 1.43s
 ```
+
+### Frontend Linter
+Run oxlint on the frontend codebase:
+
+```powershell
+cd frontend
+npm run lint
+```
+**Actual Verified Result**: 0 errors.
 
 ---
 
