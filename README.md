@@ -66,6 +66,26 @@ Modern digital products often struggle with web analytics solutions that are eit
 
 ---
 
+## How It Works (Step-by-Step Flow)
+
+1. **Client-Side Tracking**:
+   The lightweight tracker script (`tracker.js`) is embedded onto any webpage before `</body>`. On page load, it checks `sessionStorage` for an existing session or generates a unique `sessionId` (e.g., `sess_...`). It automatically records a `page_view` event.
+2. **Interaction Capture & Coordinate Normalization**:
+   When visitors interact with buttons, links, or navigation items, a global listener captures exact `(x, y)` document coordinates and viewport dimensions (`width`, `height`). Form fields containing sensitive values (passwords, tokens) are automatically ignored.
+3. **Event Ingestion & Validation**:
+   Events are posted asynchronously to the Flask backend (`POST /api/events`). The API validates the JSON payload structure against required schemas and returns HTTP 201.
+4. **Cloud Persistence (MongoDB Atlas)**:
+   Validated events are saved in the `events` collection. Compound database indexes (`sessionId` + `timestamp` and `pageUrl` + `eventType`) ensure fast query execution.
+5. **Session Aggregation**:
+   The backend aggregates raw events by `sessionId`, computing total interactions, click counts, entry points, and latest activity timestamps.
+6. **Live Visualization (React Dashboard)**:
+   The React dashboard polls aggregated data from the Flask API:
+   - **Overview KPI Cards**: Displays real-time counts for active sessions, total events, page views, and clicks.
+   - **Session Journey Inspector**: Clicking **Inspect** on any session opens a drawer detailing the visitor's chronological path.
+   - **Click Heatmap Canvas**: Renders high-density click clusters and pinpoints directly onto page wireframes with hover tooltips and normalized coordinate scaling.
+
+---
+
 ## Core Features
 
 - **Full Data Ownership**: Complete control of your interaction data with direct database access and zero vendor lock-in.
@@ -163,58 +183,80 @@ FLASK_DEBUG=True
 
 ---
 
-## Installation & Running
+## How to Run & Activate (Backend & Frontend)
 
-### 1. Backend (Flask)
+To run the complete platform, start the backend and frontend in **two separate terminal windows**:
 
-Open a PowerShell terminal in the project root:
+### Step 1: Activate & Run the Backend (Flask Server)
+
+Open **Terminal 1** in the project root:
 
 ```powershell
-# Navigate to backend
+# 1. Navigate to backend directory
 cd backend
 
-# Create virtual environment (if not already created)
+# 2. Create virtual environment (if not already created)
 python -m venv venv
 
-# Activate virtual environment
+# 3. Activate virtual environment
 # Windows PowerShell:
 .\venv\Scripts\Activate.ps1
 # Windows Command Prompt:
 .\venv\Scripts\activate.bat
 
-# Install dependencies
+# 4. Install dependencies
 pip install -r requirements.txt
 
-# Verify MongoDB Atlas live connection
+# 5. Verify database connection with MongoDB Atlas
 python test_connection.py
 
-# Start Flask server (runs on http://127.0.0.1:5000)
+# 6. Start the Flask server
 python run.py
 ```
 
-### 2. Frontend Dashboard (React + Vite)
+- **Backend Address**: `http://127.0.0.1:5000`
+- **Verify Backend is Active**: Open `http://127.0.0.1:5000/api/health` in your browser. You should receive:
+  ```json
+  {
+    "status": "healthy",
+    "database": "connected",
+    "message": "Connected successfully to MongoDB Atlas."
+  }
+  ```
 
-Open a second PowerShell terminal:
+---
+
+### Step 2: Activate & Run the Frontend (React Dashboard)
+
+Open **Terminal 2** in the project root:
 
 ```powershell
+# 1. Navigate to frontend directory
 cd frontend
 
-# Install dependencies
+# 2. Install dependencies (first time only)
 npm install
 
-# Start Vite development server (runs on http://127.0.0.1:5173)
+# 3. Start Vite development server
 npm run dev
 ```
 
-### 3. Interactive Demo Website
+- **Frontend Dashboard Address**: `http://localhost:5173`
+- **Verify Frontend is Active**: Open `http://localhost:5173` in your browser. You will see the live **User Analyser** dashboard with real-time KPI metrics, the sessions table, and the click heatmap canvas.
 
-Open `demo-site/index.html` directly in your browser or run a simple local HTTP server:
+---
+
+### Step 3: Run the Interactive Demo Website (Generate Test Events)
+
+To generate live clicks and session journeys across pages:
 
 ```powershell
-# Using Python built-in server from the project root:
+# In project root, run Python's built-in HTTP server:
 python -m http.server 5500
 ```
-Open [http://127.0.0.1:5500/demo-site/index.html](http://127.0.0.1:5500/demo-site/index.html) in your browser. Click on buttons and navigate between pages to generate real-time analytics events stored directly in MongoDB Atlas.
+- Open `http://127.0.0.1:5500/demo-site/index.html` in your browser.
+- Click buttons, switch showcase tabs, or navigate to `pricing.html`.
+- Watch real-time events immediately populate on your React dashboard at `http://localhost:5173`!
 
 ---
 
